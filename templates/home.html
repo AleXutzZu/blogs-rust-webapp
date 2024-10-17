@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="utf-8">
+<head><title>Blog Poster</title></head>
+<body style="display: flex; flex-direction: column; align-items: center; justify-items: center">
+<div>
+    <h1>Make a new post</h1>
+    <form action="/home" method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; width: 300px">
+        <label>
+            Enter your username:
+            <input type="text" name="username" required>
+        </label>
+
+        <label>
+            Pick your avatar:
+            <input type="text" name="avatar">
+        </label>
+
+        <label>
+            Upload a picture for the post:
+            <input type="file" name="image" accept="image/png">
+        </label>
+
+        <label>
+            Type text body:
+            <input type="text" required name="body">
+        </label>
+
+        <input type="submit" value="Post">
+    </form>
+</div>
+
+<div>
+    {% for post in posts %}
+    <div>{{ post }}</div>
+    {% endfor %}
+</div>
+
+</body>
+</html>

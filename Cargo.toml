@@ -1,0 +1,16 @@
+[package]
+name = "blog_posts"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "0.7.7", features = ["multipart"] }
+diesel = { version = "2.2.4", features = ["chrono", "sqlite"] }
+dotenv = "0.15.0"
+tokio = { version = "1.40.0", features = ["rt-multi-thread"] }
+chrono = { version = "0.4.38", features = ["serde"] }
+serde_json = "1.0.128"
+serde = { version = "1.0.210", features = ["derive"] }
+deadpool-diesel = {version =  "0.6.1", features = ["sqlite"] }
+diesel_migrations = "2.2.0"
+minijinja = "2.3.1"
