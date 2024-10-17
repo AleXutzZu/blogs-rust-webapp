@@ -4,7 +4,8 @@
 <body style="display: flex; flex-direction: column; align-items: center; justify-items: center">
 <div>
     <h1>Make a new post</h1>
-    <form action="/home" method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; width: 300px">
+    <form action="/home" method="post" enctype="multipart/form-data"
+          style="display: flex; flex-direction: column; width: 300px" id="post-form">
         <label>
             Enter your username:
             <input type="text" name="username" required>
@@ -25,15 +26,48 @@
             <input type="text" required name="body">
         </label>
 
-        <input type="submit" value="Post">
+        <input type="submit" value="Post" style="margin-top: 15px">
     </form>
 </div>
 
 <div>
     {% for post in posts %}
-    <div>{{ post }}</div>
+    <div style="display: flex; flex-direction: column; width: 300px;">
+        <div style="display: flex">
+            {% if post.avatar %}
+            <img src="/avatars/{{post.post_id}}" alt="User avatar" style="width: 50px; height: 50px"/>
+            {% endif %}
+            <div style="display: flex; flex-direction: column">
+                <p>Username: {{post.username}}</p>
+                <p>Created at: {{post.date}}</p>
+            </div>
+        </div>
+        <div>{{post.body}}</div>
+        {% if post.image %}
+        <img src="/posts/{{post.post_id}}" alt="Post image"/>
+        {% endif %}
+    </div>
     {% endfor %}
 </div>
+<script>
+    // Attach an event listener to the form's submit event
+    document.getElementById('post-form').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent default form submission
 
+        const formData = new FormData(this); // Create a FormData object from the form
+
+        fetch('/home', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.text())
+            .then(_message => {
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+</script>
 </body>
 </html>
