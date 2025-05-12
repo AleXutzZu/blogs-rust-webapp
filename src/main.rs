@@ -9,14 +9,12 @@ use deadpool_diesel::sqlite::Pool;
 use diesel::associations::HasTable;
 use diesel::{ExpressionMethods, NotFound, QueryDsl, RunQueryDsl, SelectableHelper};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use minijinja::context;
 use serde::Serialize;
 use std::sync::Arc;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
 struct AppState {
-    templates: minijinja::Environment<'static>,
     connection_pool: Pool,
     http_client: reqwest::Client,
 }
@@ -44,20 +42,18 @@ async fn main() {
             .unwrap();
     }
 
-    let mut templates = minijinja::Environment::new();
-    templates.add_template("home", include_str!("../templates/home.html")).unwrap();
-
-
     let state = Arc::new(AppState {
-        templates,
+        // templates,
         connection_pool: pool,
         http_client: reqwest::Client::new(),
     });
 
     let app = axum::Router::new()
-        .route("/home", axum::routing::get(home).post(accept_form))
+        .fallback_service(tower_http::services::ServeDir::new("frontend/dist"))
+        // .not_found_service(tower_http::services::ServeFile::new("frontend/dist/index.html"))
+        /*.route("/home", axum::routing::get(home).post(accept_form))
         .route("/posts/:post_id", axum::routing::get(get_image))
-        .route("/avatars/:post_id", axum::routing::get(get_avatar))
+        .route("/avatars/:post_id", axum::routing::get(get_avatar))*/
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
@@ -65,7 +61,7 @@ async fn main() {
 }
 
 
-async fn home(State(state): State<Arc<AppState>>) -> Result<Html<String>, (StatusCode, String)> {
+/*async fn home(State(state): State<Arc<AppState>>) -> Result<Html<String>, (StatusCode, String)> {
     let template = state.templates.get_template("home").map_err(internal_error)?;
     let conn = state.connection_pool.get().await.map_err(internal_error)?;
 
@@ -206,7 +202,7 @@ async fn get_avatar(axum::extract::Path(post_id): axum::extract::Path<i32>, stat
             Ok((headers, data))
         }
     }
-}
+}*/
 
 fn internal_error<E>(err: E) -> (StatusCode, String)
 where
