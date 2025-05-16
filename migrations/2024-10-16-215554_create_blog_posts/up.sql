@@ -6,6 +6,6 @@ CREATE TABLE posts
     body     TEXT    NOT NULL,
     date     DATE    NOT NULL,
     image    BLOB,
-    username VARCHAR(200) NOT NULL,
-    avatar   BLOB
+    username VARCHAR NOT NULL,
+    FOREIGN KEY (username) REFERENCES users(username)
 );
