@@ -1,6 +1,3 @@
-pub mod schema;
-pub mod models;
-
 pub mod database {
     use deadpool_diesel::Pool;
     use deadpool_diesel::sqlite::{Manager, Object};

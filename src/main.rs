@@ -2,21 +2,39 @@ use axum::extract::{Multipart, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{Html, IntoResponse};
 use blog_posts::database;
-use blog_posts::models::Post;
-use blog_posts::schema::posts::dsl::posts;
 use chrono::{Local, NaiveDate};
-use deadpool_diesel::sqlite::Pool;
+use deadpool_diesel::sqlite::{Manager, Object, Pool};
 use diesel::associations::HasTable;
 use diesel::{ExpressionMethods, NotFound, QueryDsl, RunQueryDsl, SelectableHelper};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use serde::Serialize;
+use serde::{ser, Serialize};
 use std::sync::Arc;
+use axum::routing::get;
+
+mod controller;
+mod repository;
+mod service;
+mod model;
+mod schema;
+mod error;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
 struct AppState {
-    connection_pool: Pool,
+    user_service: Arc<service::user::UserService>,
     http_client: reqwest::Client,
+}
+
+impl AppState {
+    pub async fn new(pool: Pool) -> Self {
+        let user_repo = repository::user::UserRepository::new(pool);
+        let user_service = Arc::new(service::user::UserService::new(user_repo));
+
+        Self {
+            user_service,
+            http_client: reqwest::Client::new(),
+        }
+    }
 }
 
 #[derive(Serialize)]
@@ -42,11 +60,7 @@ async fn main() {
             .unwrap();
     }
 
-    let state = Arc::new(AppState {
-        // templates,
-        connection_pool: pool,
-        http_client: reqwest::Client::new(),
-    });
+    let state = Arc::new(AppState::new(pool).await);
 
     let app = axum::Router::new()
         .fallback_service(tower_http::services::ServeDir::new("frontend/dist"))
@@ -54,6 +68,7 @@ async fn main() {
         /*.route("/home", axum::routing::get(home).post(accept_form))
         .route("/posts/:post_id", axum::routing::get(get_image))
         .route("/avatars/:post_id", axum::routing::get(get_avatar))*/
+        .route("/users", get(controller::user::get_users))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
