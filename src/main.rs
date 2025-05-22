@@ -1,37 +1,35 @@
-use axum::extract::{Multipart, State};
-use axum::http::{HeaderMap, StatusCode};
-use axum::response::{Html, IntoResponse};
 use blog_posts::database;
-use chrono::{Local, NaiveDate};
-use deadpool_diesel::sqlite::{Manager, Object, Pool};
-use diesel::associations::HasTable;
-use diesel::{ExpressionMethods, NotFound, QueryDsl, RunQueryDsl, SelectableHelper};
+use chrono::NaiveDate;
+use deadpool_diesel::sqlite::Pool;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use serde::{ser, Serialize};
+use serde::Serialize;
 use std::sync::Arc;
-use axum::routing::get;
 
 mod controller;
-mod repository;
-mod service;
-mod model;
-mod schema;
 mod error;
+mod model;
+mod repository;
+mod schema;
+mod service;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
 struct AppState {
     user_service: Arc<service::user::UserService>,
+    post_service: Arc<service::post::PostService>,
     http_client: reqwest::Client,
 }
 
 impl AppState {
     pub async fn new(pool: Pool) -> Self {
-        let user_repo = repository::user::UserRepository::new(pool);
+        let user_repo = repository::user::UserRepository::new(pool.clone());
         let user_service = Arc::new(service::user::UserService::new(user_repo));
 
+        let post_repo = repository::post::PostRepository::new(pool.clone());
+        let post_service = Arc::new(service::post::PostService::new(post_repo));
         Self {
             user_service,
+            post_service,
             http_client: reqwest::Client::new(),
         }
     }
@@ -45,7 +43,6 @@ struct ClientPost {
     image: bool,
     post_id: i32,
     date: NaiveDate,
-
 }
 
 #[tokio::main]
@@ -68,13 +65,13 @@ async fn main() {
         /*.route("/home", axum::routing::get(home).post(accept_form))
         .route("/posts/:post_id", axum::routing::get(get_image))
         .route("/avatars/:post_id", axum::routing::get(get_avatar))*/
-        .route("/users", get(controller::user::get_users))
+        // .route("/users", get(controller::user::get_users))
+        .route("/api/posts", axum::routing::get(controller::post::get_posts))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
-
 
 /*async fn home(State(state): State<Arc<AppState>>) -> Result<Html<String>, (StatusCode, String)> {
     let template = state.templates.get_template("home").map_err(internal_error)?;
@@ -218,10 +215,3 @@ async fn get_avatar(axum::extract::Path(post_id): axum::extract::Path<i32>, stat
         }
     }
 }*/
-
-fn internal_error<E>(err: E) -> (StatusCode, String)
-where
-    E: std::error::Error,
-{
-    (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
-}

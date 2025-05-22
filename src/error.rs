@@ -1,3 +1,5 @@
+use axum::http::StatusCode;
+
 #[derive(thiserror::Error, Debug)]
 pub enum AppError {
     #[error(transparent)]
@@ -9,3 +11,11 @@ pub enum AppError {
 }
 
 pub type AppResult<T> = Result<T, AppError>;
+
+pub type ApiResult<T> = Result<T, (StatusCode, String)>;
+pub fn map_internal_error<E>(err: E) -> (StatusCode, String)
+where
+    E: std::error::Error,
+{
+    (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
+}
