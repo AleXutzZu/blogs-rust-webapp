@@ -3,7 +3,7 @@ use crate::model::post::Post;
 use deadpool_diesel::sqlite::{Manager, Object};
 use deadpool_diesel::Pool;
 use diesel::associations::HasTable;
-use diesel::{QueryDsl, RunQueryDsl, SelectableHelper};
+use diesel::{OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper};
 
 pub struct PostRepository {
     connection_pool: Pool<Manager, Object>,
@@ -19,10 +19,23 @@ impl PostRepository {
         let conn = self.connection_pool.get().await?;
 
         let result = conn
-            .interact(|conn| {
-                posts::table()
+            .interact(|conn| posts::table().select(Post::as_select()).load(conn))
+            .await??;
+
+        Ok(result)
+    }
+
+    pub async fn fetch_post(&self, post_id: i32) -> AppResult<Option<Post>> {
+        use crate::schema::posts::dsl::*;
+        let conn = self.connection_pool.get().await?;
+
+        let result = conn
+            .interact(move |conn| {
+                posts
+                    .find(post_id)
                     .select(Post::as_select())
-                    .load(conn)
+                    .first(conn)
+                    .optional()
             })
             .await??;
 
