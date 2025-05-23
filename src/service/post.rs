@@ -15,4 +15,9 @@ impl PostService {
         let result = self.post_repository.fetch_all_posts().await?;
         Ok(result)
     }
+    
+    pub async fn get_post(&self, id: i32) -> AppResult<Option<Post>> {
+        let result = self.post_repository.fetch_post(id).await?;
+        Ok(result)
+    }
 }
