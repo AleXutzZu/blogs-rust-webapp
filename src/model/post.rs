@@ -1,7 +1,7 @@
+use crate::model::user::User;
 use chrono::NaiveDate;
 use diesel::{Associations, Insertable, Queryable, Selectable};
 use serde::Serialize;
-use crate::model::user::User;
 
 #[derive(Queryable, Selectable, Serialize, Associations)]
 #[diesel(table_name = crate::schema::posts)]
@@ -11,6 +11,7 @@ pub struct Post {
     pub id: i32,
     pub body: String,
     pub date: NaiveDate,
+    #[serde(skip_serializing)]
     pub image: Option<Vec<u8>>,
     pub username: String,
 }
