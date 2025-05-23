@@ -14,14 +14,15 @@ mod service;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
+#[derive(Clone)]
 struct AppState {
     user_service: Arc<service::user::UserService>,
     post_service: Arc<service::post::PostService>,
-    http_client: reqwest::Client,
+    http_client: Arc<reqwest::Client>,
 }
 
 impl AppState {
-    pub async fn new(pool: Pool) -> Self {
+    pub fn new(pool: Pool) -> Self {
         let user_repo = repository::user::UserRepository::new(pool.clone());
         let user_service = Arc::new(service::user::UserService::new(user_repo));
 
@@ -30,7 +31,7 @@ impl AppState {
         Self {
             user_service,
             post_service,
-            http_client: reqwest::Client::new(),
+            http_client: Arc::new(reqwest::Client::new()),
         }
     }
 }
@@ -57,52 +58,32 @@ async fn main() {
             .unwrap();
     }
 
-    let state = Arc::new(AppState::new(pool).await);
+    let state = AppState::new(pool);
 
     let app = axum::Router::new()
         .fallback_service(tower_http::services::ServeDir::new("frontend/dist"))
         // .not_found_service(tower_http::services::ServeFile::new("frontend/dist/index.html"))
-        /*.route("/home", axum::routing::get(home).post(accept_form))
-        .route("/posts/:post_id", axum::routing::get(get_image))
-        .route("/avatars/:post_id", axum::routing::get(get_avatar))*/
-        // .route("/users", get(controller::user::get_users))
-        .route("/api/posts", axum::routing::get(controller::post::get_posts))
+        .route(
+            "/api/posts",
+            axum::routing::get(controller::post::get_posts),
+        )
+        .route(
+            "/api/posts/{postId}",
+            axum::routing::get(controller::post::get_post),
+        )
+        // .route("/api/posts/{postId}/image", TODO: add getter)
+        // .route("api/posts/{postId}", TODO: add deleter)
+        // .route("api/user/{username}", TODO: add getter)
+        // .route("api/user/{username}/avatar", TODO: add getter)
+        // .route("/api/login", TODO: add login functionality for users)
+        // .route("/api/logout, TODO: add logout functionality for users)
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
-/*async fn home(State(state): State<Arc<AppState>>) -> Result<Html<String>, (StatusCode, String)> {
-    let template = state.templates.get_template("home").map_err(internal_error)?;
-    let conn = state.connection_pool.get().await.map_err(internal_error)?;
-
-    use blog_posts::schema::posts::id;
-
-    let user_posts = conn.interact(|conn| {
-        QueryDsl::order(posts::table().select(Post::as_select()), id.desc()).load(conn)
-    }).await.map_err(internal_error)?.map_err(internal_error)?;
-
-    let client = user_posts.into_iter().map(|post| {
-        ClientPost {
-            username: post.username,
-            date: post.date,
-            body: post.body,
-            post_id: post.id,
-            image: post.image.is_some(),
-            avatar: post.avatar.is_some(),
-        }
-    }).collect::<Vec<_>>();
-
-    let rendered = template
-        .render(context! {
-            posts => client,
-        })
-        .map_err(internal_error)?;
-
-    Ok(Html(rendered))
-}
-async fn accept_form(State(state): State<Arc<AppState>>, mut form_data: Multipart) -> Result<(), (StatusCode, String)> {
+/*async fn accept_form(State(state): State<Arc<AppState>>, mut form_data: Multipart) -> Result<(), (StatusCode, String)> {
     let mut new_post = blog_posts::models::InsertPost::default();
 
     new_post.date = Local::now().date_naive();
