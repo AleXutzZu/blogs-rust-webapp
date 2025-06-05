@@ -1,10 +1,11 @@
 import {Outlet} from "react-router"
+import NavigationBar from "../components/NavigationBar.tsx";
 
 function MainLayout() {
 
     return (
         <>
-            <div>Navbar</div>
+            <NavigationBar/>
             <Outlet/>
         </>
     )
