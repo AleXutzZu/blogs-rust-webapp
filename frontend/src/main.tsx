@@ -3,6 +3,7 @@ import './index.css'
 import MainLayout from './pages/MainLayout.tsx'
 import {createBrowserRouter, RouterProvider} from "react-router";
 import PostsPage from "./pages/PostsPage.tsx";
+import CreatePostPage from "./pages/CreatePostPage.tsx";
 
 const router = createBrowserRouter([
     {
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
             },
             {
                 path: "user",
+            },
+            {
+                path: "create",
+                element: <CreatePostPage/>
             }
         ]
     }
