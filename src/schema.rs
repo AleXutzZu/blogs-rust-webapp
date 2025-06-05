@@ -13,7 +13,7 @@ diesel::table! {
 
 diesel::table! {
     sessions (session_id) {
-        session_id -> Nullable<Text>,
+        session_id -> Text,
         username -> Text,
     }
 }
