@@ -6,7 +6,9 @@ function MainLayout() {
     return (
         <>
             <NavigationBar/>
-            <Outlet/>
+            <main className="grow flex bg-gray-50">
+                <Outlet/>
+            </main>
         </>
     )
 }

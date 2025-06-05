@@ -8,7 +8,7 @@ export default function PostsPage() {
     }, []);
 
     return (
-        <div className="flex flex-col items-center pt-12">
+        <div className="flex flex-col items-center mx-auto mt-12">
             {posts.map(post => <Post {...post}/>)}
         </div>
     )
