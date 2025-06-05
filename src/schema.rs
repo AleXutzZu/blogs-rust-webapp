@@ -3,6 +3,7 @@
 diesel::table! {
     posts (id) {
         id -> Integer,
+        title -> Text,
         body -> Text,
         date -> Date,
         image -> Nullable<Binary>,

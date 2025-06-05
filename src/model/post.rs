@@ -9,6 +9,7 @@ use serde::Serialize;
 #[diesel(belongs_to(User, foreign_key=username))]
 pub struct Post {
     pub id: i32,
+    pub title: String,
     pub body: String,
     pub date: NaiveDate,
     #[serde(skip_serializing)]
