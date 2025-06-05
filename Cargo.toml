@@ -16,3 +16,5 @@ deadpool-diesel = { version = "0.6.1", features = ["sqlite"] }
 diesel_migrations = "2.2.0"
 reqwest = "0.12.8"
 thiserror = "2.0.12"
+uuid = {version =  "1.17.0", features = ["v4"] }
+bcrypt = "0.17.0"
