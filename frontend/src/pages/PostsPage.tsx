@@ -1,11 +1,12 @@
 import Post, {type IPost} from "../components/Post.tsx";
-import {useEffect, useState} from "react";
+import {useLoaderData} from "react-router";
+
+export async function loader() {
+    return await fetch("api/posts").then(res => res.json()).then(values => values as IPost[]);
+}
 
 export default function PostsPage() {
-    const [posts, setPosts] = useState<IPost[]>([]);
-    useEffect(() => {
-        fetch("/api/posts").then(result => result.json()).then(values => setPosts(values as IPost[]));
-    }, []);
+    let posts = useLoaderData<IPost[]>();
 
     return (
         <div className="flex flex-col items-center mx-auto mt-12">

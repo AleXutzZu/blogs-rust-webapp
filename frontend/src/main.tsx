@@ -2,7 +2,7 @@ import {createRoot} from 'react-dom/client'
 import './index.css'
 import MainLayout from './pages/MainLayout.tsx'
 import {createBrowserRouter, RouterProvider} from "react-router";
-import PostsPage from "./pages/PostsPage.tsx";
+import PostsPage, {loader as postsLoader} from "./pages/PostsPage.tsx";
 import CreatePostPage from "./pages/CreatePostPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import SignUpPage from "./pages/SignUpPage.tsx";
@@ -14,7 +14,8 @@ const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <PostsPage/>
+                element: <PostsPage/>,
+                loader: postsLoader,
             },
             {
                 path: "login",
