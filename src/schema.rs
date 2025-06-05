@@ -12,6 +12,13 @@ diesel::table! {
 }
 
 diesel::table! {
+    sessions (session_id) {
+        session_id -> Nullable<Text>,
+        username -> Text,
+    }
+}
+
+diesel::table! {
     users (username) {
         username -> Text,
         password -> Text,
@@ -20,8 +27,10 @@ diesel::table! {
 }
 
 diesel::joinable!(posts -> users (username));
+diesel::joinable!(sessions -> users (username));
 
 diesel::allow_tables_to_appear_in_same_query!(
     posts,
+    sessions,
     users,
 );
