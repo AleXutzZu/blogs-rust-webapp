@@ -15,9 +15,17 @@ impl PostService {
         let result = self.post_repository.fetch_all_posts().await?;
         Ok(result)
     }
-    
+
     pub async fn get_post(&self, id: i32) -> AppResult<Option<Post>> {
         let result = self.post_repository.fetch_post(id).await?;
         Ok(result)
+    }
+
+    pub async fn get_post_image(&self, id: i32) -> AppResult<Option<Vec<u8>>> {
+        let result = self.post_repository.fetch_post(id).await?;
+        match result {
+            None => Ok(None),
+            Some(post) => Ok(post.image),
+        }
     }
 }

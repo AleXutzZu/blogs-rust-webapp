@@ -1,8 +1,6 @@
 use blog_posts::database;
-use chrono::NaiveDate;
 use deadpool_diesel::sqlite::Pool;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use serde::Serialize;
 use std::sync::Arc;
 
 mod controller;
@@ -36,16 +34,6 @@ impl AppState {
     }
 }
 
-#[derive(Serialize)]
-struct ClientPost {
-    body: String,
-    username: String,
-    avatar: bool,
-    image: bool,
-    post_id: i32,
-    date: NaiveDate,
-}
-
 #[tokio::main]
 async fn main() {
     let pool = database::create_pool();
@@ -71,7 +59,10 @@ async fn main() {
             "/api/posts/{postId}",
             axum::routing::get(controller::post::get_post),
         )
-        // .route("/api/posts/{postId}/image", TODO: add getter)
+        .route(
+            "/api/posts/{postId}/image",
+            axum::routing::get(controller::post::get_post_image),
+        )
         // .route("api/posts/{postId}", TODO: add deleter)
         // .route("api/user/{username}", TODO: add getter)
         // .route("api/user/{username}/avatar", TODO: add getter)
@@ -151,28 +142,6 @@ async fn main() {
         })
         .await.map_err(internal_error)?.map_err(internal_error)?;
     Ok(())
-}
-
-async fn get_image(axum::extract::Path(post_id): axum::extract::Path<i32>, state: State<Arc<AppState>>) -> Result<impl IntoResponse, (StatusCode, String)> {
-    let conn = state.connection_pool.get().await.map_err(internal_error)?;
-
-    let res = conn.interact(move |conn| {
-        posts::table().find(post_id).select(Post::as_select()).first(conn)
-    }).await.map_err(internal_error)?.map_err(internal_error)?;
-
-    let content_type = "image/png";
-
-    let mut headers = HeaderMap::new();
-    headers.insert("Content-Type", content_type.parse().map_err(internal_error)?);
-
-    match res.image {
-        None => {
-            Err(internal_error(NotFound))
-        }
-        Some(data) => {
-            Ok((headers, data))
-        }
-    }
 }
 
 async fn get_avatar(axum::extract::Path(post_id): axum::extract::Path<i32>, state: State<Arc<AppState>>) -> Result<impl IntoResponse, (StatusCode, String)> {

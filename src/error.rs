@@ -13,9 +13,17 @@ pub enum AppError {
 pub type AppResult<T> = Result<T, AppError>;
 
 pub type ApiResult<T> = Result<T, (StatusCode, String)>;
+
 pub fn map_internal_error<E>(err: E) -> (StatusCode, String)
 where
     E: std::error::Error,
 {
     (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
+}
+
+pub fn map_not_found_error<E>(err: E) -> (StatusCode, String)
+where
+    E: std::error::Error,
+{
+    (StatusCode::NOT_FOUND, err.to_string())
 }
