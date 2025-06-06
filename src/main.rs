@@ -65,9 +65,10 @@ async fn main() {
         // .route("api/posts/{postId}", TODO: add deleter)
         // .route("api/user/{username}", TODO: add getter)
         // .route("api/user/{username}/avatar", TODO: add getter)
-        .route("/api/login", axum::routing::post(controller::user::login_user))
-        // .route("/api/logout, TODO: add logout functionality for users)
-        // .route("/api/signup, TODO: add signup functionality for users)
+        .route("/api/auth/login", axum::routing::post(controller::user::login_user))
+        .route("/api/auth/logout", axum::routing::post(controller::user::logout_user))
+        .route("/api/auth/signup", axum::routing::post(controller::user::signup_user))
+        .route("/api/auth/me", axum::routing::get(controller::user::validate_session))
         .with_state(state);
 
 

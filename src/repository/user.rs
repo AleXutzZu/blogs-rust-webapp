@@ -3,7 +3,7 @@ use crate::model::user::User;
 use deadpool_diesel::sqlite::{Manager, Object};
 use deadpool_diesel::Pool;
 use diesel::QueryDsl;
-use diesel::{ExpressionMethods, OptionalExtension};
+use diesel::OptionalExtension;
 use diesel::{RunQueryDsl, SelectableHelper};
 
 pub struct UserRepository {

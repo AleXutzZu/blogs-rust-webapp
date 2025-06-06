@@ -15,6 +15,8 @@ pub enum AppError {
     NotFoundError(String),
     #[error("Error: {0}")]
     InternalError(String),
+    #[error(transparent)]
+    BcryptError(#[from] bcrypt::BcryptError),
 }
 
 impl IntoResponse for AppError {
@@ -26,6 +28,7 @@ impl IntoResponse for AppError {
             AppError::LoginError(_) => StatusCode::UNAUTHORIZED.into_response(),
             AppError::NotFoundError(_) => StatusCode::NOT_FOUND.into_response(),
             AppError::InternalError(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+            AppError::BcryptError(_) => StatusCode::BAD_REQUEST.into_response(),
         }
     }
 }

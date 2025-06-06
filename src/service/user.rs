@@ -1,3 +1,4 @@
+use bcrypt::DEFAULT_COST;
 use crate::error::AppError::{InternalError, LoginError};
 use crate::error::{AppError, AppResult};
 use crate::model::session::Session;
@@ -50,5 +51,25 @@ impl UserService {
         } else {
             Err(LoginError("Invalid username".to_string()))
         }
+    }
+
+    pub async fn logout(&self, session_id: String) -> AppResult<()> {
+        self.session_repository.delete_session(session_id).await?;
+        Ok(())
+    }
+    
+    pub async fn get_user_by_session(&self, session_id: String) -> AppResult<Option<User>> {
+        self.session_repository.get_user_by_session(session_id).await
+    }
+    
+    pub async fn create_user(&self, username: &str, password: &str) -> AppResult<()> {
+        let hashed_pass = bcrypt::hash(password, DEFAULT_COST)?;
+        
+        self.user_repository.create_new_user(User {
+            username: username.to_string(),
+            password: hashed_pass,
+            avatar: None
+        }).await?;
+        Ok(())
     }
 }
