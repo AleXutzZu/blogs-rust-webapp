@@ -1,13 +1,23 @@
+use crate::error::AppResult;
 use crate::AppState;
 use axum::extract::State;
-use std::sync::Arc;
+use axum::http::StatusCode;
+use axum::Form;
+use axum_extra::extract::cookie::Cookie;
+use axum_extra::extract::CookieJar;
+use serde::Deserialize;
 
-pub async fn get_users(state: State<Arc<AppState>>) {
-    println!("Fetched users");
-    let result = state.user_service.get_users().await;
+#[derive(Deserialize)]
+pub struct AuthForm {
+    username: String,
+    password: String,
+}
 
-    match result {
-        Ok(users) => { println!("Got some users") }
-        Err(_) => { println!("Something went wrong") }
-    }
+pub async fn login_user(State(state): State<AppState>,  jar: CookieJar, Form(form): Form<AuthForm>)
+                        -> AppResult<(CookieJar, StatusCode)> {
+    let uuid = state.user_service
+        .login(&form.username, &form.password)
+        .await?;
+
+    Ok((jar.add(Cookie::new("session_id", uuid.to_string())), StatusCode::NO_CONTENT))
 }

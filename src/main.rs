@@ -2,7 +2,6 @@ use blog_posts::database;
 use deadpool_diesel::sqlite::Pool;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use std::sync::Arc;
-
 mod controller;
 mod error;
 mod model;
@@ -16,20 +15,20 @@ pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 struct AppState {
     user_service: Arc<service::user::UserService>,
     post_service: Arc<service::post::PostService>,
-    http_client: Arc<reqwest::Client>,
 }
 
 impl AppState {
     pub fn new(pool: Pool) -> Self {
         let user_repo = repository::user::UserRepository::new(pool.clone());
-        let user_service = Arc::new(service::user::UserService::new(user_repo));
-
+        let session_repo = repository::session::SessionRepository::new(pool.clone());
         let post_repo = repository::post::PostRepository::new(pool.clone());
+
+        let user_service = Arc::new(service::user::UserService::new(user_repo, session_repo));
         let post_service = Arc::new(service::post::PostService::new(post_repo));
+
         Self {
             user_service,
             post_service,
-            http_client: Arc::new(reqwest::Client::new()),
         }
     }
 }
@@ -47,7 +46,6 @@ async fn main() {
     }
 
     let state = AppState::new(pool);
-
     let app = axum::Router::new()
         .fallback_service(tower_http::services::ServeDir::new("frontend/dist"))
         // .not_found_service(tower_http::services::ServeFile::new("frontend/dist/index.html"))
@@ -63,12 +61,15 @@ async fn main() {
             "/api/posts/{postId}/image",
             axum::routing::get(controller::post::get_post_image),
         )
+        // .route("api/posts/create", TODO: add POST mapping)
         // .route("api/posts/{postId}", TODO: add deleter)
         // .route("api/user/{username}", TODO: add getter)
         // .route("api/user/{username}/avatar", TODO: add getter)
-        // .route("/api/login", TODO: add login functionality for users)
+        .route("/api/login", axum::routing::post(controller::user::login_user))
         // .route("/api/logout, TODO: add logout functionality for users)
+        // .route("/api/signup, TODO: add signup functionality for users)
         .with_state(state);
+
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
@@ -143,25 +144,4 @@ async fn main() {
         .await.map_err(internal_error)?.map_err(internal_error)?;
     Ok(())
 }
-
-async fn get_avatar(axum::extract::Path(post_id): axum::extract::Path<i32>, state: State<Arc<AppState>>) -> Result<impl IntoResponse, (StatusCode, String)> {
-    let conn = state.connection_pool.get().await.map_err(internal_error)?;
-
-    let res = conn.interact(move |conn| {
-        posts::table().find(post_id).select(Post::as_select()).first(conn)
-    }).await.map_err(internal_error)?.map_err(internal_error)?;
-
-    let content_type = "image/png";
-
-    let mut headers = HeaderMap::new();
-    headers.insert("Content-Type", content_type.parse().map_err(internal_error)?);
-
-    match res.avatar {
-        None => {
-            Err(internal_error(NotFound))
-        }
-        Some(data) => {
-            Ok((headers, data))
-        }
-    }
-}*/
+*/

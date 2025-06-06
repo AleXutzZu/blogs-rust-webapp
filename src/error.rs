@@ -1,4 +1,5 @@
 use axum::http::StatusCode;
+use axum::response::{IntoResponse, Response};
 
 #[derive(thiserror::Error, Debug)]
 pub enum AppError {
@@ -8,22 +9,24 @@ pub enum AppError {
     DieselError(#[from] diesel::result::Error),
     #[error(transparent)]
     InteractError(#[from] deadpool_diesel::InteractError),
+    #[error("Could not be logged in: {0}")]
+    LoginError(String),
+    #[error("Could not find: {0}")]
+    NotFoundError(String),
+    #[error("Error: {0}")]
+    InternalError(String),
 }
 
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        match self {
+            AppError::PoolError(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+            AppError::DieselError(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+            AppError::InteractError(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+            AppError::LoginError(_) => StatusCode::UNAUTHORIZED.into_response(),
+            AppError::NotFoundError(_) => StatusCode::NOT_FOUND.into_response(),
+            AppError::InternalError(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+        }
+    }
+}
 pub type AppResult<T> = Result<T, AppError>;
-
-pub type ApiResult<T> = Result<T, (StatusCode, String)>;
-
-pub fn map_internal_error<E>(err: E) -> (StatusCode, String)
-where
-    E: std::error::Error,
-{
-    (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
-}
-
-pub fn map_not_found_error<E>(err: E) -> (StatusCode, String)
-where
-    E: std::error::Error,
-{
-    (StatusCode::NOT_FOUND, err.to_string())
-}
