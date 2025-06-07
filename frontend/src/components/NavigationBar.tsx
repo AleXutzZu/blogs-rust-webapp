@@ -1,13 +1,58 @@
-import {NavLink} from "react-router";
+import {NavLink, useFetcher, useRouteLoaderData} from "react-router";
+import type {AuthUser} from "../auth.ts";
 
 export default function NavigationBar() {
+    const {user} = useRouteLoaderData("root") as { user: AuthUser | null };
+    const fetcher = useFetcher();
+
     return (
-        <nav className="flex items-center justify-between bg-blue-500 py-4 px-16">
-            <div className="flex h-full items-center space-x-12">
-                <NavLink to={"/"} className="text-xl text-gray-200 font-bold">Posts</NavLink>
-                <NavLink to={"/create"} className="text-xl text-gray-200 font-bold">Create</NavLink>
+        <nav className="bg-blue-600 text-white shadow-lg px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <NavLink
+                    to="/"
+                    className={({isActive}) =>
+                        `text-white hover:text-blue-100 font-medium ${isActive ? 'underline' : ''}`
+                    }
+                >
+                    All Posts
+                </NavLink>
+
+                <NavLink
+                    to="/create"
+                    className={({isActive}) =>
+                        `text-white hover:text-blue-100 font-medium ${isActive ? 'underline' : ''}`
+                    }
+                >
+                    Create Post
+                </NavLink>
             </div>
-            <NavLink to={"/login"} className="text-xl text-gray-200 font-bold">Login</NavLink>
+            {!user && (
+                <NavLink
+                    to="/login"
+                    className={({isActive}) =>
+                        `text-white hover:text-blue-100 font-medium ${isActive ? 'underline' : ''}`
+                    }
+                >
+                    Login
+                </NavLink>
+            )}
+            {user && (
+                <fetcher.Form className="flex items-center gap-4 bg-blue-500 px-3 py-2 rounded-xl shadow-md"
+                              method="post" action="/logout">
+                    <img
+                        src={`/api/user/${user.username}/avatar`} //TODO add stock photo if none is found
+                        alt="Profile"
+                        className="w-8 h-8 rounded-full object-cover border-2 border-white"
+                    />
+                    <span className="font-semibold">{user.username}</span>
+                    <button
+                        type="submit"
+                        className="bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-blue-100 font-medium"
+                    >
+                        Logout
+                    </button>
+                </fetcher.Form>
+            )}
         </nav>
     )
 }
