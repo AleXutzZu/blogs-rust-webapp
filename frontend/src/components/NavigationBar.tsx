@@ -1,4 +1,4 @@
-import {NavLink, useFetcher, useRouteLoaderData} from "react-router";
+import {Link, NavLink, useFetcher, useRouteLoaderData} from "react-router";
 import type {AuthUser} from "../auth.ts";
 import {useState} from "react";
 
@@ -56,7 +56,7 @@ export default function NavigationBar() {
                         </svg>
                     }
 
-                    <span className="font-semibold">{user.username}</span>
+                    <Link className="font-semibold" to={`/user/${user.username}`}>{user.username}</Link>
                     <button
                         type="submit"
                         className="bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-blue-100 font-medium transition-colors duration-150 ease-in"
