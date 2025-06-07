@@ -4,7 +4,7 @@ use crate::model::user::User;
 use crate::AppState;
 use axum::extract::State;
 use axum::http::StatusCode;
-use axum::{Form, Json};
+use axum::Json;
 use axum_extra::extract::cookie::{Cookie, SameSite};
 use axum_extra::extract::CookieJar;
 use serde::Deserialize;
@@ -18,15 +18,21 @@ pub struct AuthForm {
 pub async fn login_user(
     State(state): State<AppState>,
     jar: CookieJar,
-    Form(form): Form<AuthForm>,
+    Json(form): Json<AuthForm>,
 ) -> AppResult<(CookieJar, StatusCode)> {
     let uuid = state
         .user_service
         .login(&form.username, &form.password)
         .await?;
 
+    let cookie = Cookie::build(("session_id", uuid.to_string()))
+        .path("/")
+        .http_only(true)
+        .same_site(SameSite::Lax)
+        .build();
+    
     Ok((
-        jar.add(Cookie::new("session_id", uuid.to_string())),
+        jar.add(cookie),
         StatusCode::NO_CONTENT,
     ))
 }
@@ -80,7 +86,7 @@ pub async fn validate_session(
 
 pub async fn signup_user(
     State(state): State<AppState>,
-    Form(form): Form<AuthForm>,
+    Json(form): Json<AuthForm>,
 ) -> AppResult<StatusCode> {
     state
         .user_service
