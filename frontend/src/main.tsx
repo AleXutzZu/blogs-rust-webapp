@@ -1,7 +1,7 @@
 import {createRoot} from 'react-dom/client'
 import './index.css'
 import MainLayout from './pages/MainLayout.tsx'
-import {createBrowserRouter, RouterProvider} from "react-router";
+import {createBrowserRouter, redirect, RouterProvider} from "react-router";
 import PostsPage, {loader as postsLoader} from "./pages/PostsPage.tsx";
 import CreatePostPage from "./pages/CreatePostPage.tsx";
 import LoginPage, {action as loginAction, loader as loginLoader} from "./pages/LoginPage.tsx";
@@ -13,9 +13,10 @@ const router = createBrowserRouter([
         path: "/",
         element: <MainLayout/>,
         async loader() {
-            await authProvider.checkAuth();
-            return {user: authProvider.user}
+            const user = await authProvider.checkAuth();
+            return {user: user}
         },
+        id: "root",
         children: [
             {
                 index: true,
@@ -42,6 +43,13 @@ const router = createBrowserRouter([
                 loader: protectedLoaderWrapper()
             }
         ]
+    },
+    {
+        path: "/logout",
+        async action() {
+            await authProvider.signOut();
+            return redirect("/");
+        }
     }
 ])
 

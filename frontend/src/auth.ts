@@ -1,7 +1,7 @@
 import type {LoaderFunction, LoaderFunctionArgs} from "react-router";
 import {redirect} from "react-router"
 
-interface AuthUser {
+export interface AuthUser {
     username: string;
 }
 
@@ -11,26 +11,24 @@ interface AuthResult {
 }
 
 interface AuthProvider {
-    user: null | AuthUser
 
     signIn(username: string, password: string): Promise<AuthResult>,
 
-    checkAuth(): Promise<void>,
+    checkAuth(): Promise<AuthUser | null>,
 
     signOut(): Promise<AuthResult>,
 
-    isAuthenticated(): boolean,
+    isAuthenticated(): Promise<boolean>,
 }
 
 export const authProvider: AuthProvider = {
-    user: null,
     async checkAuth() {
         let response = await fetch("/api/auth/me", {credentials: "include"});
 
         if (response.ok) {
-            this.user = await response.json() as AuthUser;
+            return await response.json() as AuthUser;
         } else {
-            this.user = null;
+            return null;
         }
     },
 
@@ -61,25 +59,25 @@ export const authProvider: AuthProvider = {
 
         if (!response.ok) return {success: false, error: "Failed to logout"};
 
-        this.user = null;
         return {success: true};
     },
 
-    isAuthenticated(): boolean {
-        return this.user != null;
+    async isAuthenticated(): Promise<boolean> {
+        const user = await this.checkAuth();
+        return user != null;
     }
 }
 
 
 export const protectedLoaderWrapper = (loader?: LoaderFunction<any>) => {
     return async (args: LoaderFunctionArgs) => {
-        if (!authProvider.isAuthenticated()) {
+        if (!await authProvider.isAuthenticated()) {
             let params = new URLSearchParams();
             params.set("redirectTo", new URL(args.request.url).pathname);
             return redirect("/login?" + params.toString());
         }
         if (typeof loader === "undefined") return;
 
-        return await loader(args);
+        return loader(args);
     }
 }
