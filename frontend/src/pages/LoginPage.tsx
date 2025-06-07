@@ -1,4 +1,4 @@
-import {type ActionFunctionArgs, Link, redirect, useSubmit} from "react-router";
+import {type ActionFunctionArgs, Link, redirect, useNavigation, useSubmit} from "react-router";
 import {authProvider} from "../auth.ts";
 import * as Yup from "yup";
 import {Form, Formik} from "formik";
@@ -13,16 +13,15 @@ export async function action({request}: ActionFunctionArgs) {
 
     if (result.success) {
         //TODO redirect back to page
-        return redirect("/")
+        return redirect("/");
     }
-    console.log(result.error);
     return {
         error: "Invalid login attempt"
     }
 }
 
 export async function loader() {
-    if (authProvider.isAuthenticated()) return redirect("/");
+    if (await authProvider.isAuthenticated()) return redirect("/");
 }
 
 export default function LoginPage() {
@@ -32,6 +31,12 @@ export default function LoginPage() {
         username: Yup.string().required(),
         password: Yup.string().required(),
     });
+
+    //TODO make some use of knowing when the user is logging in
+    let navigation = useNavigation();
+    let isLoggingIn = navigation.formData?.get("username") != null;
+
+    //TODO add errors for invalid username/password
 
     return (
         <Formik initialValues={{username: "", password: ""}} onSubmit={async (values) => {
@@ -52,7 +57,7 @@ export default function LoginPage() {
                     </div>
 
                     <button type="submit" className="w-full py-2 bg-blue-600 text-white
-                    rounded-lg hover:bg-blue-700 transition">Log In
+                    rounded-lg hover:bg-blue-700 transition" disabled={isLoggingIn}>{isLoggingIn ? "Logging in..." : "Log In"}
                     </button>
 
                     <p className="text-sm text-center text-gray-600">
