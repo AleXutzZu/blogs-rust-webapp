@@ -28,7 +28,7 @@ export default function Post(props: IPost) {
                     {props.body}
                 </p>
                 {!imageError && <img
-                    src={`/api/posts${props.id}/image`}
+                    src={`/api/posts/${props.id}/image`}
                     alt="Post image"
                     className="rounded-lg w-full mb-4"
                     onError={() => setImageError(true)}
