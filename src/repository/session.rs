@@ -21,6 +21,8 @@ impl SessionRepository {
         use crate::schema::sessions::dsl::*;
         let conn = self.connection_pool.get().await?;
         conn.interact(move |conn| {
+            diesel::delete(sessions::table()).filter(username.eq(&session.username)).execute(conn)?;
+            
             diesel::insert_into(sessions::table())
                 .values(&session)
                 .execute(conn)
