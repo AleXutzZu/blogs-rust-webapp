@@ -182,7 +182,6 @@ dependencies = [
  "diesel_migrations",
  "dotenv",
  "serde",
- "serde_json",
  "thiserror",
  "time",
  "tokio",
