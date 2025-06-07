@@ -14,7 +14,7 @@ type Props = {
 const Input = ({label, children, ...props}: Props) => {
     const [field, meta] = useField({...props})
 
-    const labelErrorClasses: string = "block text-sm font-medium text-red-200";
+    const labelErrorClasses: string = "block text-sm font-medium text-red-500";
 
     return (
         <>
