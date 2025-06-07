@@ -2,11 +2,13 @@ use blog_posts::database;
 use deadpool_diesel::sqlite::Pool;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use std::sync::Arc;
+use tower_http::cors::{Any, CorsLayer};
 mod controller;
 mod error;
 mod model;
 mod repository;
 mod schema;
+
 mod service;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
@@ -45,6 +47,15 @@ async fn main() {
             .unwrap();
     }
 
+    let cors = CorsLayer::new()
+        .allow_origin("http://localhost:5173".parse::<axum::http::HeaderValue>().unwrap())
+        .allow_credentials(true)
+        .allow_methods([
+            axum::http::Method::GET,
+            axum::http::Method::POST,
+            axum::http::Method::DELETE,
+        ]);
+
     let state = AppState::new(pool);
     let app = axum::Router::new()
         .fallback_service(tower_http::services::ServeDir::new("frontend/dist"))
@@ -65,12 +76,24 @@ async fn main() {
         // .route("api/posts/{postId}", TODO: add deleter)
         // .route("api/user/{username}", TODO: add getter)
         // .route("api/user/{username}/avatar", TODO: add getter)
-        .route("/api/auth/login", axum::routing::post(controller::user::login_user))
-        .route("/api/auth/logout", axum::routing::post(controller::user::logout_user))
-        .route("/api/auth/signup", axum::routing::post(controller::user::signup_user))
-        .route("/api/auth/me", axum::routing::get(controller::user::validate_session))
+        .route(
+            "/api/auth/login",
+            axum::routing::post(controller::user::login_user),
+        )
+        .route(
+            "/api/auth/logout",
+            axum::routing::post(controller::user::logout_user),
+        )
+        .route(
+            "/api/auth/signup",
+            axum::routing::post(controller::user::signup_user),
+        )
+        .route(
+            "/api/auth/me",
+            axum::routing::get(controller::user::validate_session),
+        )
+        .layer(cors)
         .with_state(state);
-
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
