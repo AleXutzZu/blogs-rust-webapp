@@ -4,13 +4,18 @@ import MainLayout from './pages/MainLayout.tsx'
 import {createBrowserRouter, RouterProvider} from "react-router";
 import PostsPage, {loader as postsLoader} from "./pages/PostsPage.tsx";
 import CreatePostPage from "./pages/CreatePostPage.tsx";
-import LoginPage from "./pages/LoginPage.tsx";
-import SignUpPage from "./pages/SignUpPage.tsx";
+import LoginPage, {action as loginAction, loader as loginLoader} from "./pages/LoginPage.tsx";
+import SignUpPage, {action as signUpAction} from "./pages/SignUpPage.tsx";
+import {authProvider, protectedLoaderWrapper} from "./auth.ts";
 
 const router = createBrowserRouter([
     {
         path: "/",
         element: <MainLayout/>,
+        async loader() {
+            await authProvider.checkAuth();
+            return {user: authProvider.user}
+        },
         children: [
             {
                 index: true,
@@ -19,18 +24,22 @@ const router = createBrowserRouter([
             },
             {
                 path: "login",
-                element: <LoginPage/>
+                element: <LoginPage/>,
+                action: loginAction,
+                loader: loginLoader
             },
             {
                 path: "signup",
-                element: <SignUpPage/>
+                element: <SignUpPage/>,
+                action: signUpAction
             },
             {
                 path: "user",
             },
             {
                 path: "create",
-                element: <CreatePostPage/>
+                element: <CreatePostPage/>,
+                loader: protectedLoaderWrapper()
             }
         ]
     }
