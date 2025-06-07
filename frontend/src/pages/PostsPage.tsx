@@ -9,8 +9,8 @@ export default function PostsPage() {
     let posts = useLoaderData<IPost[]>();
 
     return (
-        <div className="flex flex-col items-center mx-auto mt-12">
-            {posts.map(post => <Post {...post}/>)}
+        <div className="flex flex-col items-center mx-auto mt-12 w-5/6 md:w-2/3">
+            {posts.map(post => <Post {...post} key={post.id}/>)}
         </div>
     )
 }

@@ -15,7 +15,7 @@ export default function Post(props: IPost) {
     const [imageError, setImageError] = useState(false);
 
     return (
-        <div className="relative max-w-md lg:max-w-2xl mx-auto my-6 p-4 rounded-2xl shadow-lg bg-white min-w-xs">
+        <div className="relative w-2/3 md:max-w-2xl mx-auto my-6 p-4 rounded-2xl shadow-lg bg-white min-w-xs">
             <h2 className="text-2xl font-semibold">{props.title}</h2>
             <p className="text-sm mb-2">by <Link to={`/user/${props.username}`}
                                                  className="italic text-sm">{props.username}</Link> - {format(props.date, "MMM do yyyy")}</p>
