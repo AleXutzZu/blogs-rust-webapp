@@ -76,8 +76,8 @@ export default function LoginPage() {
     }, [actionData]);
 
 
-    let navigation = useNavigation();
-    let isLoggingIn = navigation.formData?.get("username") != null;
+    const navigation = useNavigation();
+    const isLoggingIn = navigation.formData?.get("username") != null;
 
     const onSubmit = async (data: AuthForm) => {
         await submit({...data, redirectTo}, {method: "post"});
