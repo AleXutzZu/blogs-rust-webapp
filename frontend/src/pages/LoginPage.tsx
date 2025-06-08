@@ -12,6 +12,7 @@ import * as Yup from "yup";
 import {FormProvider, useForm, useFormContext} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {type HTMLInputTypeAttribute, useEffect} from "react";
+import loadingSpinner from "../assets/loading-spinner.svg"
 
 export async function action({request}: ActionFunctionArgs) {
     const formData = await request.formData();
@@ -85,8 +86,8 @@ export default function LoginPage() {
 
     return (
         <FormProvider {...methods}>
-            <div className="flex items-center justify-center m-auto min-w-xs">
-                <form className="w-full max-w-sm p-6 bg-white rounded-2xl shadow-md space-y-5"
+            <div className="flex items-center justify-center m-auto min-w-xs max-w-sm relative">
+                <form className="w-full p-6 bg-white rounded-2xl shadow-md space-y-5"
                       onSubmit={methods.handleSubmit(onSubmit)}>
                     <h2 className="text-2xl font-semibold text-center">Login</h2>
                     <div>
@@ -107,6 +108,12 @@ export default function LoginPage() {
                         </Link>
                     </p>
                 </form>
+                {isLoggingIn && (
+                    <div
+                        className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center rounded-2xl z-20">
+                        <img src={loadingSpinner} className="w-24 h-24 fill-gray-600" alt="Loading..."/>
+                    </div>
+                )}
             </div>
         </FormProvider>
     );
