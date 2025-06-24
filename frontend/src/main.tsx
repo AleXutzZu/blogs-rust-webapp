@@ -3,7 +3,7 @@ import './index.css'
 import MainLayout from './pages/MainLayout.tsx'
 import {createBrowserRouter, redirect, RouterProvider} from "react-router";
 import PostsPage, {loader as postsLoader} from "./pages/PostsPage.tsx";
-import CreatePostPage from "./pages/CreatePostPage.tsx";
+import CreatePostPage, {action as createPostAction} from "./pages/CreatePostPage.tsx";
 import LoginPage, {action as loginAction, loader as loginLoader} from "./pages/LoginPage.tsx";
 import SignUpPage, {action as signUpAction} from "./pages/SignUpPage.tsx";
 import {authProvider, protectedLoaderWrapper} from "./auth.ts";
@@ -40,7 +40,8 @@ const router = createBrowserRouter([
             {
                 path: "create",
                 element: <CreatePostPage/>,
-                loader: protectedLoaderWrapper()
+                loader: protectedLoaderWrapper(),
+                action: createPostAction,
             }
         ]
     },
