@@ -18,7 +18,7 @@ export default function Post(props: IPost) {
         <div className="relative w-2/3 md:max-w-2xl mx-auto my-6 p-4 rounded-2xl shadow-lg bg-white min-w-xs">
             <h2 className="text-2xl font-semibold">{props.title}</h2>
             <p className="text-sm mb-2">by <Link to={`/user/${props.username}`}
-                                                 className="italic text-sm">{props.username}</Link> - {format(props.date, "MMM do yyyy")}</p>
+                                                 className="italic text-sm">{props.username}</Link> - {format(props.date, "MMM do yyyy p")}</p>
             <div
                 className={`transition-all duration-500 ${
                     expanded ? "blur-0 h-auto" : "blur-[2px] max-h-60 overflow-hidden"
