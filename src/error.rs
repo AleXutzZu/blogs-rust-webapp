@@ -17,6 +17,8 @@ pub enum AppError {
     InternalError(String),
     #[error(transparent)]
     BcryptError(#[from] bcrypt::BcryptError),
+    #[error(transparent)]
+    FormError(#[from] axum_extra::extract::multipart::MultipartError)
 }
 
 impl IntoResponse for AppError {
@@ -29,6 +31,7 @@ impl IntoResponse for AppError {
             AppError::NotFoundError(_) => StatusCode::NOT_FOUND.into_response(),
             AppError::InternalError(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
             AppError::BcryptError(_) => StatusCode::BAD_REQUEST.into_response(),
+            AppError::FormError(_) => StatusCode::BAD_REQUEST.into_response(),
         }
     }
 }
