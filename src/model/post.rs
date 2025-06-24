@@ -1,5 +1,5 @@
 use crate::model::user::User;
-use chrono::NaiveDate;
+use chrono::{NaiveDate, NaiveDateTime};
 use diesel::{Associations, Insertable, Queryable, Selectable};
 use serde::Serialize;
 
@@ -11,7 +11,7 @@ pub struct Post {
     pub id: i32,
     pub title: String,
     pub body: String,
-    pub date: NaiveDate,
+    pub date: NaiveDateTime,
     #[serde(skip_serializing)]
     pub image: Option<Vec<u8>>,
     pub username: String,
@@ -23,17 +23,7 @@ pub struct Post {
 pub struct NewPost {
     pub title: String,
     pub body: String,
-    pub date: NaiveDate,
-    pub image: Option<Vec<u8>>,
-    pub username: String,
-}
-
-#[derive(Insertable, Default)]
-#[diesel(table_name = crate::schema::posts)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-pub struct InsertPost {
-    pub body: String,
-    pub date: NaiveDate,
+    pub date: NaiveDateTime,
     pub image: Option<Vec<u8>>,
     pub username: String,
 }

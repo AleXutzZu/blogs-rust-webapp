@@ -41,7 +41,7 @@ impl PostService {
             body,
             image,
             username,
-            date: chrono::Utc::now().date_naive(),
+            date: chrono::Utc::now().naive_utc(),
         };
 
         self.post_repository.create_post(post).await?;

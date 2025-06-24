@@ -5,7 +5,7 @@ diesel::table! {
         id -> Integer,
         title -> Text,
         body -> Text,
-        date -> Date,
+        date -> Timestamp,
         image -> Nullable<Binary>,
         username -> Text,
     }
