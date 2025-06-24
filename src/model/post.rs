@@ -17,6 +17,17 @@ pub struct Post {
     pub username: String,
 }
 
+#[derive(Insertable)]
+#[diesel(table_name = crate::schema::posts)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+pub struct NewPost {
+    pub title: String,
+    pub body: String,
+    pub date: NaiveDate,
+    pub image: Option<Vec<u8>>,
+    pub username: String,
+}
+
 #[derive(Insertable, Default)]
 #[diesel(table_name = crate::schema::posts)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
