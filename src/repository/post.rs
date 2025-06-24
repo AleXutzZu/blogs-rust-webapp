@@ -3,7 +3,7 @@ use crate::model::post::{NewPost, Post};
 use deadpool_diesel::sqlite::{Manager, Object};
 use deadpool_diesel::Pool;
 use diesel::associations::HasTable;
-use diesel::{ExpressionMethods, Insertable, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper};
+use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper};
 
 pub struct PostRepository {
     connection_pool: Pool<Manager, Object>,

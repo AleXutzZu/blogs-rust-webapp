@@ -1,4 +1,4 @@
-use crate::error::AppError::{InteractError, InternalError, NotFoundError};
+use crate::error::AppError::{InternalError, NotFoundError};
 use crate::error::AppResult;
 use crate::model::post::Post;
 use crate::AppState;
