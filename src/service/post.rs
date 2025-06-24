@@ -1,5 +1,5 @@
 use crate::error::AppResult;
-use crate::model::post::Post;
+use crate::model::post::{NewPost, Post};
 use crate::repository::post::PostRepository;
 
 pub struct PostService {
@@ -27,5 +27,24 @@ impl PostService {
             None => Ok(None),
             Some(post) => Ok(post.image),
         }
+    }
+
+    pub async fn create_post(
+        &self,
+        title: String,
+        body: String,
+        image: Option<Vec<u8>>,
+        username: String,
+    ) -> AppResult<()> {
+        let post = NewPost {
+            title,
+            body,
+            image,
+            username,
+            date: chrono::Utc::now().date_naive(),
+        };
+
+        self.post_repository.create_post(post).await?;
+        Ok(())
     }
 }

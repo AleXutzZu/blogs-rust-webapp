@@ -1,9 +1,9 @@
 use crate::error::AppResult;
-use crate::model::post::Post;
+use crate::model::post::{NewPost, Post};
 use deadpool_diesel::sqlite::{Manager, Object};
 use deadpool_diesel::Pool;
 use diesel::associations::HasTable;
-use diesel::{OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper};
+use diesel::{ExpressionMethods, Insertable, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper};
 
 pub struct PostRepository {
     connection_pool: Pool<Manager, Object>,
@@ -19,7 +19,12 @@ impl PostRepository {
         let conn = self.connection_pool.get().await?;
 
         let result = conn
-            .interact(|conn| posts::table().select(Post::as_select()).load(conn))
+            .interact(|conn| {
+                posts::table()
+                    .select(Post::as_select())
+                    .order_by(date.desc())
+                    .load(conn)
+            })
             .await??;
 
         Ok(result)
@@ -40,5 +45,17 @@ impl PostRepository {
             .await??;
 
         Ok(result)
+    }
+
+    pub async fn create_post(&self, post: NewPost) -> AppResult<()> {
+        use crate::schema::posts::dsl::*;
+        let conn = self.connection_pool.get().await?;
+        conn.interact(move |conn| {
+            diesel::insert_into(posts::table())
+                .values(post)
+                .execute(conn)
+        })
+        .await??;
+        Ok(())
     }
 }
