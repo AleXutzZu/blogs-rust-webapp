@@ -25,7 +25,7 @@ export async function action({request}: ActionFunctionArgs) {
         return redirect(redirectTo);
     }
     return {
-        error: "Username or password are wrong"
+        error: result.error
     }
 }
 

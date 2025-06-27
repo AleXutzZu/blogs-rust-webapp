@@ -4,26 +4,20 @@ import {type AuthForm, AuthInput} from "./LoginPage.tsx";
 import {FormProvider, useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {useEffect} from "react";
+import {authProvider} from "../auth.ts";
 
 export async function action({request}: ActionFunctionArgs) {
     const formData = await request.formData();
     const username = formData.get("username") as string;
     const password = formData.get("password") as string;
 
-    const result = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            username,
-            password
-        })
-    })
+    const result = await authProvider.signUp(username, password);
 
-    if (result.ok) {
-        return redirect("/login")
+    if (result.success) {
+        return redirect("/login");
     }
     return {
-        error: "Invalid signup attempt"
+        error: result.error
     }
 }
 
