@@ -79,7 +79,7 @@ pub async fn validate_session(
                 .await?
                 .map(|user| Json(user));
 
-            Ok(result.ok_or(LoginError("Could not validate current session".to_string()))?)
+            Ok(result.ok_or(LoginError)?)
         }
     }
 }

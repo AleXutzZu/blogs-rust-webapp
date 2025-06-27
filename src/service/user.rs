@@ -44,12 +44,12 @@ impl UserService {
 
                         return Ok(session_id);
                     }
-                    Err(LoginError("Invalid password".to_string()))
+                    Err(LoginError)
                 }
                 Err(_) => Err(InternalError("Invalid password".to_string())),
             }
         } else {
-            Err(LoginError("Invalid username".to_string()))
+            Err(LoginError)
         }
     }
 

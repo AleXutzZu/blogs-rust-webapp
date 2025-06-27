@@ -1,38 +1,67 @@
 use axum::http::StatusCode;
+use axum::Json;
 use axum::response::{IntoResponse, Response};
+use serde::Serialize;
 
 #[derive(thiserror::Error, Debug)]
 pub enum AppError {
     #[error(transparent)]
     PoolError(#[from] deadpool_diesel::PoolError),
     #[error(transparent)]
-    DieselError(#[from] diesel::result::Error),
-    #[error(transparent)]
     InteractError(#[from] deadpool_diesel::InteractError),
-    #[error("Could not be logged in: {0}")]
-    LoginError(String),
-    #[error("Could not find: {0}")]
+    #[error("Invalid credentials")]
+    LoginError,
+    #[error("{0}")]
     NotFoundError(String),
     #[error("Error: {0}")]
     InternalError(String),
     #[error(transparent)]
     BcryptError(#[from] bcrypt::BcryptError),
     #[error(transparent)]
-    FormError(#[from] axum_extra::extract::multipart::MultipartError)
+    FormError(#[from] axum_extra::extract::multipart::MultipartError),
+    #[error("Username already exists")]
+    SignUpError,
+    #[error("{0}")]
+    DieselError(String),
+}
+
+impl From<diesel::result::Error> for AppError {
+    fn from(value: diesel::result::Error) -> Self {
+        match value {
+            diesel::result::Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, _) => AppError::SignUpError,
+            _ => AppError::DieselError(value.to_string()),
+        }
+    }
+}
+
+#[derive(Serialize)]
+struct ErrorResponse {
+    error: String,
+    message: String,
 }
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        match self {
-            AppError::PoolError(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
-            AppError::DieselError(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
-            AppError::InteractError(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
-            AppError::LoginError(_) => StatusCode::UNAUTHORIZED.into_response(),
-            AppError::NotFoundError(_) => StatusCode::NOT_FOUND.into_response(),
-            AppError::InternalError(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
-            AppError::BcryptError(_) => StatusCode::BAD_REQUEST.into_response(),
-            AppError::FormError(_) => StatusCode::BAD_REQUEST.into_response(),
-        }
+        let (status, message) = match &self {
+            AppError::PoolError(_)
+            | AppError::DieselError(_)
+            | AppError::InteractError(_)
+            | AppError::BcryptError(_)
+            | AppError::FormError(_)
+            | AppError::InternalError(_)
+            | AppError::SignUpError => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
+
+            AppError::LoginError => (StatusCode::UNAUTHORIZED, self.to_string()),
+
+            AppError::NotFoundError(_) => (StatusCode::NOT_FOUND, self.to_string()),
+        };
+
+        let body = Json(ErrorResponse {
+            error: status.to_string(),
+            message,
+        });
+
+        (status, body).into_response()
     }
 }
 pub type AppResult<T> = Result<T, AppError>;
