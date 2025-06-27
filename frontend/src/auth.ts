@@ -10,6 +10,11 @@ interface AuthResult {
     error?: string;
 }
 
+interface ApiError {
+    error: string,
+    message: string,
+}
+
 interface AuthProvider {
 
     signIn(username: string, password: string): Promise<AuthResult>,
@@ -19,6 +24,8 @@ interface AuthProvider {
     signOut(): Promise<AuthResult>,
 
     isAuthenticated(): Promise<boolean>,
+
+    signUp(username: string, password: string): Promise<AuthResult>,
 }
 
 export const authProvider: AuthProvider = {
@@ -44,8 +51,8 @@ export const authProvider: AuthProvider = {
                 password: password,
             })
         });
-
-        if (!response.ok) return {success: false, error: "Failed to authenticate"};
+        const body = await response.json();
+        if (!response.ok) return {success: false, error: (body as ApiError).message};
 
         await this.checkAuth();
         return {success: true};
@@ -56,8 +63,8 @@ export const authProvider: AuthProvider = {
             credentials: "include",
             method: "POST"
         });
-
-        if (!response.ok) return {success: false, error: "Failed to logout"};
+        const body = await response.json();
+        if (!response.ok) return {success: false, error: (body as ApiError).message};
 
         return {success: true};
     },
@@ -65,6 +72,20 @@ export const authProvider: AuthProvider = {
     async isAuthenticated(): Promise<boolean> {
         const user = await this.checkAuth();
         return user != null;
+    },
+
+    async signUp(username: string, password: string): Promise<AuthResult> {
+        const response = await fetch("/api/auth/signup", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                username,
+                password
+            })
+        });
+        const body = await response.json();
+        if (!response.ok) return {success: false, error: (body as ApiError).message};
+        return {success: true};
     }
 }
 
