@@ -100,6 +100,7 @@ impl PostRepository {
                 };
                 Post::belonging_to(&user)
                     .select(Post::as_select())
+                    .order_by(crate::schema::posts::dsl::date.desc())
                     .offset(offset_count)
                     .limit(limit_count)
                     .load(conn)
