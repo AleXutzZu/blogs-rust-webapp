@@ -22,6 +22,10 @@ impl UserService {
     pub async fn get_users(&self) -> Result<Vec<User>, AppError> {
         self.user_repository.fetch_all_users().await
     }
+    
+    pub async fn get_user_by_username(&self, username: &str) -> AppResult<Option<User>> {
+        self.user_repository.get_user_by_username(username.to_string()).await
+    }
 
     pub async fn login(&self, username: &str, password: &str) -> AppResult<uuid::Uuid> {
         let user = self

@@ -73,9 +73,9 @@ async fn main() {
             axum::routing::get(controller::post::get_post_image),
         )
         .route("/api/posts/create", axum::routing::post(controller::post::create_post))
-        // .route("api/posts/{postId}", TODO: add deleter)
-        // .route("api/user/{username}", TODO: add getter)
-        // .route("api/user/{username}/avatar", TODO: add getter)
+        // .route("/api/posts/{postId}", TODO: add deleter)
+        .route("/api/users/{username}", axum::routing::get(controller::user::get_user_with_posts))
+        // .route("/api/users/{username}/avatar", TODO: add getter)
         .route(
             "/api/auth/login",
             axum::routing::post(controller::user::login_user),
