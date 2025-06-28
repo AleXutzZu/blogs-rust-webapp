@@ -43,7 +43,7 @@ export default function NavigationBar() {
                               method="post" action="/logout">
 
                     {!stockPhoto && <img
-                        src={`/api/user/${user.username}/avatar`}
+                        src={`/api/users/${user.username}/avatar`}
                         alt="Profile"
                         className="w-8 h-8 rounded-full object-cover border-2 border-white"
                         onError={() => setStockPhoto(true)}
@@ -56,7 +56,7 @@ export default function NavigationBar() {
                         </svg>
                     }
 
-                    <Link className="font-semibold" to={`/user/${user.username}`}>{user.username}</Link>
+                    <Link className="font-semibold" to={`/users/${user.username}`}>{user.username}</Link>
                     <button
                         type="submit"
                         className="bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-blue-100 font-medium transition-colors duration-150 ease-in"
