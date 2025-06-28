@@ -51,11 +51,12 @@ export const authProvider: AuthProvider = {
                 password: password,
             })
         });
-        const body = await response.json();
-        if (!response.ok) return {success: false, error: (body as ApiError).message};
-
-        await this.checkAuth();
-        return {success: true};
+        if (response.status == 204) {
+            await this.checkAuth();
+            return {success: true};
+        }
+        const body = await response.json() as ApiError;
+        return {success: false, error: body.message};
     },
 
     async signOut(): Promise<AuthResult> {
@@ -63,10 +64,13 @@ export const authProvider: AuthProvider = {
             credentials: "include",
             method: "POST"
         });
-        const body = await response.json();
-        if (!response.ok) return {success: false, error: (body as ApiError).message};
-
-        return {success: true};
+        
+        if (response.status == 204) {
+            await this.checkAuth();
+            return {success: true};
+        }
+        const body = await response.json() as ApiError;
+        return {success: false, error: body.message};
     },
 
     async isAuthenticated(): Promise<boolean> {
@@ -83,9 +87,12 @@ export const authProvider: AuthProvider = {
                 password
             })
         });
-        const body = await response.json();
-        if (!response.ok) return {success: false, error: (body as ApiError).message};
-        return {success: true};
+        if (response.status == 204) {
+            await this.checkAuth();
+            return {success: true};
+        }
+        const body = await response.json() as ApiError;
+        return {success: false, error: body.message};
     }
 }
 
