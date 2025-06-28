@@ -1,9 +1,9 @@
 use crate::model::user::User;
-use chrono::{NaiveDate, NaiveDateTime};
-use diesel::{Associations, Insertable, Queryable, Selectable};
+use chrono::NaiveDateTime;
+use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
 use serde::Serialize;
 
-#[derive(Queryable, Selectable, Serialize, Associations)]
+#[derive(Queryable, Selectable, Serialize, Associations, Identifiable)]
 #[diesel(table_name = crate::schema::posts)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 #[diesel(belongs_to(User, foreign_key=username))]
