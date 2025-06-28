@@ -6,7 +6,7 @@ use deadpool_diesel::Pool;
 use diesel::associations::HasTable;
 use diesel::QueryDsl;
 use diesel::{ExpressionMethods, SelectableHelper};
-use diesel::{OptionalExtension, RunQueryDsl};
+use diesel::RunQueryDsl;
 
 pub struct SessionRepository {
     connection_pool: Pool<Manager, Object>,
