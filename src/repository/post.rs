@@ -76,23 +76,15 @@ impl PostRepository {
         &self,
         user: &User,
         page: i32,
-        page_size: i32,
     ) -> AppResult<Vec<Post>> {
+        let posts_per_page: i64 = 7;
+        
         let conn = self.connection_pool.get().await?;
         let username = user.username.clone();
         let result = conn
             .interact(move |conn| {
-                let offset_count: i64 = if page_size == -1 {
-                    0
-                } else {
-                    (page - 1) as i64 * page_size as i64
-                };
-
-                let limit_count = if page_size == -1 {
-                    i64::MAX
-                } else {
-                    page_size as i64
-                };
+                let offset_count: i64 = (page - 1) as i64 * posts_per_page;
+                
 
                 let user = User {
                     username,
@@ -102,7 +94,7 @@ impl PostRepository {
                     .select(Post::as_select())
                     .order_by(crate::schema::posts::dsl::date.desc())
                     .offset(offset_count)
-                    .limit(limit_count)
+                    .limit(posts_per_page)
                     .load(conn)
             })
             .await??;

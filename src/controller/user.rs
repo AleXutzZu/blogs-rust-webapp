@@ -91,7 +91,6 @@ pub async fn signup_user(
 #[derive(Deserialize)]
 pub struct PaginatedPostSearch {
     pub page: Option<i32>,
-    pub page_size: Option<i32>,
 }
 
 pub async fn get_user_with_posts(
@@ -112,7 +111,6 @@ pub async fn get_user_with_posts(
                 .get_posts_of_user(
                     &u,
                     params.page.map_or(1, |t| t),
-                    params.page_size.map_or(-1, |t| t),
                 )
                 .await?;
 

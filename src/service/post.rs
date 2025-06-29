@@ -49,8 +49,8 @@ impl PostService {
         Ok(())
     }
     
-    pub async fn get_posts_of_user(&self, user: &User, page: i32, page_size: i32) -> AppResult<Vec<Post>> {
-        self.post_repository.get_posts_by_username(user, page, page_size).await
+    pub async fn get_posts_of_user(&self, user: &User, page: i32) -> AppResult<Vec<Post>> {
+        self.post_repository.get_posts_by_username(user, page).await
     }
     
     pub async fn get_post_count_by_username(&self, username: &str) -> AppResult<i64> {
