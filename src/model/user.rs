@@ -1,5 +1,5 @@
 use chrono::NaiveDate;
-use diesel::{Identifiable, Insertable, Queryable, Selectable};
+use diesel::{AsChangeset, Identifiable, Insertable, Queryable, Selectable};
 use serde::{Deserialize, Serialize};
 use crate::model::post::Post;
 
@@ -23,4 +23,14 @@ pub struct UserDTO {
     pub user: User,
     pub posts: Vec<Post>,
     pub total_posts: i64,
+}
+
+#[derive(AsChangeset, Serialize)]
+#[diesel(table_name = crate::schema::users)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[diesel(primary_key(username))]
+pub struct UpdateUser {
+    pub username: Option<String>,
+    pub password: Option<String>,
+    pub avatar: Option<Vec<u8>>,
 }
