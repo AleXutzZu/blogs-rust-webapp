@@ -2,7 +2,7 @@ import {useState} from "react";
 import {Link} from "react-router";
 import {format} from "date-fns";
 
-export interface IPost {
+export interface Post {
     id: number,
     title: string,
     body: string,
@@ -10,7 +10,7 @@ export interface IPost {
     username: string,
 }
 
-export default function Post(props: IPost) {
+export default function Post(props: Post) {
     const [expanded, setExpanded] = useState(false);
     const [imageError, setImageError] = useState(false);
 
