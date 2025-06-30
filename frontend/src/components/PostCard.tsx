@@ -10,7 +10,7 @@ export interface Post {
     username: string,
 }
 
-export default function Post(props: Post) {
+export default function PostCard(props: Post) {
     const [expanded, setExpanded] = useState(false);
     const [imageError, setImageError] = useState(false);
 
@@ -29,7 +29,7 @@ export default function Post(props: Post) {
                 </p>
                 {!imageError && <img
                     src={`/api/posts/${props.id}/image`}
-                    alt="Post image"
+                    alt="PostCard image"
                     className="rounded-lg w-full mb-4"
                     onError={() => setImageError(true)}
                 />}

@@ -1,4 +1,4 @@
-import Post, {type Post} from "../components/Post.tsx";
+import PostCard , {type Post} from "../components/PostCard.tsx";
 import {useLoaderData} from "react-router";
 
 export async function loader() {
@@ -10,7 +10,7 @@ export default function PostsPage() {
 
     return (
         <div className="flex flex-col items-center mx-auto mt-12 w-5/6 md:w-2/3">
-            {posts.map(post => <Post {...post} key={post.id}/>)}
+            {posts.map(post => <PostCard {...post} key={post.id}/>)}
         </div>
     )
 }
