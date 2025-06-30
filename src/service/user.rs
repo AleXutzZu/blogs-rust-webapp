@@ -1,10 +1,11 @@
-use bcrypt::DEFAULT_COST;
 use crate::error::AppError::{InternalError, LoginError};
 use crate::error::{AppError, AppResult};
 use crate::model::session::Session;
 use crate::model::user::User;
 use crate::repository::session::SessionRepository;
 use crate::repository::user::UserRepository;
+use bcrypt::DEFAULT_COST;
+use chrono::Utc;
 
 pub struct UserService {
     user_repository: UserRepository,
@@ -72,7 +73,8 @@ impl UserService {
         self.user_repository.create_new_user(User {
             username: username.to_string(),
             password: hashed_pass,
-            avatar: None
+            avatar: None,
+            joined: Utc::now().date_naive(),
         }).await?;
         Ok(())
     }

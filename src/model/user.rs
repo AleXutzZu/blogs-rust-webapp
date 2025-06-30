@@ -1,3 +1,4 @@
+use chrono::NaiveDate;
 use diesel::{Identifiable, Insertable, Queryable, Selectable};
 use serde::{Deserialize, Serialize};
 use crate::model::post::Post;
@@ -12,6 +13,7 @@ pub struct User {
     pub password: String,
     #[serde(skip_serializing)]
     pub avatar: Option<Vec<u8>>,
+    pub joined: NaiveDate,
 }
 
 #[derive(Serialize)]

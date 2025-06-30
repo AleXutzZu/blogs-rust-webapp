@@ -23,6 +23,7 @@ diesel::table! {
         username -> Text,
         password -> Text,
         avatar -> Nullable<Binary>,
+        joined -> Date,
     }
 }
 
