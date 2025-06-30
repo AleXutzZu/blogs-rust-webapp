@@ -7,6 +7,7 @@ import CreatePostPage, {action as createPostAction} from "./pages/CreatePostPage
 import LoginPage, {action as loginAction, loader as loginLoader} from "./pages/LoginPage.tsx";
 import SignUpPage, {action as signUpAction} from "./pages/SignUpPage.tsx";
 import {authProvider, protectedLoaderWrapper} from "./auth.ts";
+import UserPage, {loader as userLoader} from "./pages/UserPage.tsx";
 
 const router = createBrowserRouter([
     {
@@ -35,7 +36,9 @@ const router = createBrowserRouter([
                 action: signUpAction
             },
             {
-                path: "user",
+                path: "users/:username",
+                element: <UserPage/>,
+                loader: userLoader
             },
             {
                 path: "create",
