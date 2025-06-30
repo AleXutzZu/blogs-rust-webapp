@@ -1,5 +1,5 @@
 use crate::error::AppResult;
-use crate::model::user::User;
+use crate::model::user::{UpdateUser, User};
 use deadpool_diesel::sqlite::{Manager, Object};
 use deadpool_diesel::Pool;
 use diesel::QueryDsl;
@@ -51,5 +51,17 @@ impl UserRepository {
             .await??;
 
         Ok(result)
+    }
+
+    pub async fn update_user(&self, user: UpdateUser) -> AppResult<()> {
+        let conn = self.connection_pool.get().await?;
+        
+        conn.interact(move |conn| {
+            diesel::update(crate::schema::users::table)
+                .set(&user)
+                .execute(conn)
+        }).await??;
+        
+        Ok(())
     }
 }

@@ -3,10 +3,11 @@ use crate::error::{AppResult, JsonResult};
 use crate::model::user::{User, UserDTO};
 use crate::AppState;
 use axum::extract::{Path, Query, State};
-use axum::http::StatusCode;
+use axum::http::{HeaderMap, StatusCode};
+use axum::response::IntoResponse;
 use axum::Json;
 use axum_extra::extract::cookie::{Cookie, SameSite};
-use axum_extra::extract::CookieJar;
+use axum_extra::extract::{CookieJar, Multipart};
 use serde::Deserialize;
 #[derive(Deserialize)]
 pub struct AuthForm {
@@ -108,10 +109,7 @@ pub async fn get_user_with_posts(
                 .await?;
             let posts = state
                 .post_service
-                .get_posts_of_user(
-                    &u,
-                    params.page.map_or(1, |t| t),
-                )
+                .get_posts_of_user(&u, params.page.map_or(1, |t| t))
                 .await?;
 
             Ok(Json(Some(UserDTO {
@@ -120,5 +118,78 @@ pub async fn get_user_with_posts(
                 total_posts: count,
             })))
         }
+    }
+}
+
+pub async fn update_user(
+    State(state): State<AppState>,
+    Path(username): Path<String>,
+    jar: CookieJar,
+    mut multipart: Multipart,
+) -> AppResult<StatusCode> {
+    let cookie = jar.get("session_id").ok_or(InternalError(
+        "Could not update profile picture".to_string(),
+    ))?;
+
+    let session_id = cookie.value().to_string();
+    let user = state
+        .user_service
+        .get_user_by_session(session_id)
+        .await?
+        .ok_or(InternalError("Could not create post".to_string()))?;
+
+    if user.username != username {
+        return Err(InternalError("Usernames do not match".to_string()));
+    }
+
+    let mut avatar: Option<Vec<u8>> = None;
+
+    while let Some(field) = multipart.next_field().await? {
+        let name = field
+            .name()
+            .ok_or(InternalError("Field not found".to_string()))?;
+
+        match name {
+            "avatar" => {
+                let file_data = field.bytes().await;
+
+                match file_data {
+                    Ok(data) => {
+                        if data.is_empty() {
+                            avatar = None
+                        } else {
+                            avatar = Some(data.to_vec())
+                        }
+                    }
+                    _ => avatar = None,
+                }
+            }
+            _ => {}
+        }
+    }
+    if let Some(avatar) = avatar {
+        state
+            .user_service
+            .update_user_avatar(&username, &avatar)
+            .await?;
+    }
+
+    Ok(StatusCode::OK)
+}
+
+pub async fn get_user_avatar(
+    State(state): State<AppState>,
+    Path(username): Path<String>,
+) -> AppResult<impl IntoResponse> {
+    let result = state.user_service.get_user_avatar(&username).await?;
+
+    let content_type = "image/png";
+
+    let mut headers = HeaderMap::new();
+    headers.insert("Content-Type", content_type.parse().unwrap());
+
+    match result {
+        None => Err(NotFoundError("Could not find image".to_string())),
+        Some(data) => Ok((headers, data)),
     }
 }

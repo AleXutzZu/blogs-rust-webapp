@@ -1,7 +1,7 @@
 use crate::error::AppError::{InternalError, LoginError};
 use crate::error::{AppError, AppResult};
 use crate::model::session::Session;
-use crate::model::user::User;
+use crate::model::user::{UpdateUser, User};
 use crate::repository::session::SessionRepository;
 use crate::repository::user::UserRepository;
 use bcrypt::DEFAULT_COST;
@@ -23,9 +23,11 @@ impl UserService {
     pub async fn get_users(&self) -> Result<Vec<User>, AppError> {
         self.user_repository.fetch_all_users().await
     }
-    
+
     pub async fn get_user_by_username(&self, username: &str) -> AppResult<Option<User>> {
-        self.user_repository.get_user_by_username(username.to_string()).await
+        self.user_repository
+            .get_user_by_username(username.to_string())
+            .await
     }
 
     pub async fn login(&self, username: &str, password: &str) -> AppResult<uuid::Uuid> {
@@ -62,20 +64,50 @@ impl UserService {
         self.session_repository.delete_session(session_id).await?;
         Ok(())
     }
-    
+
     pub async fn get_user_by_session(&self, session_id: String) -> AppResult<Option<User>> {
-        self.session_repository.get_user_by_session(session_id).await
+        self.session_repository
+            .get_user_by_session(session_id)
+            .await
     }
-    
+
     pub async fn create_user(&self, username: &str, password: &str) -> AppResult<()> {
         let hashed_pass = bcrypt::hash(password, DEFAULT_COST)?;
-        
-        self.user_repository.create_new_user(User {
-            username: username.to_string(),
-            password: hashed_pass,
-            avatar: None,
-            joined: Utc::now().date_naive(),
-        }).await?;
+
+        self.user_repository
+            .create_new_user(User {
+                username: username.to_string(),
+                password: hashed_pass,
+                avatar: None,
+                joined: Utc::now().date_naive(),
+            })
+            .await?;
         Ok(())
+    }
+
+    pub async fn update_user_avatar(&self, username: &str, avatar: &[u8]) -> AppResult<()> {
+        let payload = UpdateUser {
+            username: Some(username.to_string()),
+            password: None,
+            avatar: Some(avatar.to_vec()),
+        };
+
+        self.user_repository.update_user(payload).await?;
+
+        Ok(())
+    }
+
+    pub async fn get_user_avatar(&self, username: &str) -> AppResult<Option<Vec<u8>>> {
+        let user = self.get_user_by_username(username).await?;
+        match user {
+            None => Ok(None),
+            Some(u) => {
+                if let Some(avatar) = u.avatar {
+                    Ok(Some(avatar))
+                } else {
+                    Ok(None)
+                }
+            }
+        }
     }
 }

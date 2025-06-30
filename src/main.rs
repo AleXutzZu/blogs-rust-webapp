@@ -48,7 +48,11 @@ async fn main() {
     }
 
     let cors = CorsLayer::new()
-        .allow_origin("http://localhost:5173".parse::<axum::http::HeaderValue>().unwrap())
+        .allow_origin(
+            "http://localhost:5173"
+                .parse::<axum::http::HeaderValue>()
+                .unwrap(),
+        )
         .allow_credentials(true)
         .allow_methods([
             axum::http::Method::GET,
@@ -72,10 +76,23 @@ async fn main() {
             "/api/posts/{postId}/image",
             axum::routing::get(controller::post::get_post_image),
         )
-        .route("/api/posts/create", axum::routing::post(controller::post::create_post))
+        .route(
+            "/api/posts/create",
+            axum::routing::post(controller::post::create_post),
+        )
         // .route("/api/posts/{postId}", TODO: add deleter)
-        .route("/api/users/{username}", axum::routing::get(controller::user::get_user_with_posts))
-        // .route("/api/users/{username}/avatar", TODO: add getter)
+        .route(
+            "/api/users/{username}",
+            axum::routing::get(controller::user::get_user_with_posts),
+        )
+        .route(
+            "/api/users/{username}",
+            axum::routing::post(controller::user::update_user),
+        )
+        .route(
+            "/api/users/{username}/avatar",
+            axum::routing::get(controller::user::get_user_avatar),
+        )
         .route(
             "/api/auth/login",
             axum::routing::post(controller::user::login_user),
