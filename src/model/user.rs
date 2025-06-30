@@ -17,6 +17,7 @@ pub struct User {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UserDTO {
     #[serde(flatten)]
     pub user: User,
