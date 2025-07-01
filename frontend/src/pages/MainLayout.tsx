@@ -1,4 +1,4 @@
-import {Outlet, useLoaderData} from "react-router"
+import {Outlet, useLoaderData, useLocation} from "react-router"
 import NavigationBar from "../components/NavigationBar.tsx";
 import {useCallback, useEffect, useState} from "react";
 import {AuthContext, type AuthContextMethods, authProvider, type AuthUser} from "../auth.ts";
@@ -8,12 +8,9 @@ export async function loader() {
     const user = await authProvider.checkAuth();
     return {user: user}
 }
+
 function MainLayout() {
     const data = useLoaderData<typeof loader>();
-
-    useEffect(() => {
-        document.title = "RustyPosts | Main Page"
-    }, []);
 
     useEffect(() => {
         const date = Date.now();
@@ -46,6 +43,29 @@ function MainLayout() {
     const stockPhotoSetter = useCallback((state: boolean) => {
         setStockPhoto(state);
     }, []);
+
+    const location = useLocation();
+
+    useEffect(() => {
+        switch (true) {
+            case "/login" === location.pathname:
+                document.title = "Login | RustyPosts";
+                break;
+
+            case "/signup" === location.pathname:
+                document.title = "Create an account | RustyPosts";
+                break;
+
+            case /^\/users\/[^\/]+$/.test(location.pathname): {
+                const match = location.pathname.match(/^\/users\/([^\/]+)$/);
+                const username = match?.[1];
+                document.title = `${username}'s Profile | RustyPosts`;
+                break;
+            }
+            default:
+                document.title = "RustyPosts"
+        }
+    }, [location.pathname]);
 
     const methods: AuthContextMethods = {
         getLoggedUser,
