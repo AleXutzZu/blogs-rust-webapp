@@ -10,6 +10,7 @@ import UserPage, {action as userAction, loader as userLoader} from "./pages/User
 import UserErrorPage from "./pages/UserErrorPage.tsx";
 import GlobalErrorPage from "./pages/GlobalErrorPage.tsx";
 import {StrictMode} from "react";
+import ReactModal from "react-modal";
 
 const router = createBrowserRouter([
     {
@@ -52,6 +53,8 @@ const router = createBrowserRouter([
         }
     },
 ])
+
+ReactModal.setAppElement('#root');
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
