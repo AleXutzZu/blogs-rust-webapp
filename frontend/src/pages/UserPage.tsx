@@ -11,6 +11,7 @@ import {yupResolver} from "@hookform/resolvers/yup";
 import {EditableProfilePicture, ViewerProfilePicture} from "../components/ProfilePicture.tsx";
 import toast from "react-hot-toast";
 import {format} from "date-fns";
+import PostLoadingSkeleton from "../components/PostLoadingSkeleton.tsx";
 
 interface UserDTO {
     username: string,
@@ -70,9 +71,14 @@ export default function UserPage() {
     const data = useLoaderData<typeof loader>();
     const authMethods = useAuthContext();
     const [posts, setPosts] = useState<Post[]>(data.user.posts);
+    const [isLoading, setLoading] = useState(false);
 
     const updatePosts = useCallback((posts: Post[]) => {
         setPosts(posts);
+    }, []);
+
+    const updateLoading = useCallback((loading: boolean) => {
+        setLoading(loading);
     }, []);
 
     const user = authMethods.getLoggedUser();
@@ -87,9 +93,11 @@ export default function UserPage() {
             <hr className="my-4"/>
             <div className="flex flex-col space-y-6 items-center w-full">
                 <PostsPaginatorBar totalPosts={data.user.totalPosts}
-                                   username={data.user.username} updateCallback={updatePosts}/>
+                                   username={data.user.username} updateCallback={updatePosts}
+                                   updateLoading={updateLoading}/>
                 {user && user.username == data.user.username && <CreatePostDialogOpener/>}
-                {posts.map(post => <UserProfilePost {...post} key={post.id}/>)}
+                {!isLoading && posts.map(post => <UserProfilePost {...post} key={post.id}/>)}
+                {isLoading && <PostLoadingSkeleton/>}
             </div>
         </div>);
 }
@@ -113,9 +121,9 @@ function UserProfilePost(props: Post) {
             <h2 className="text-2xl font-semibold">{props.title}</h2>
             <p className="text-sm mb-2">{format(props.date, "MMM do yyyy p")}</p>
             <div ref={contentRef}
-                className={`transition-all duration-500 ${
-                    expanded ? "h-auto" : "max-h-60 overflow-hidden"
-                }`}
+                 className={`transition-all duration-500 ${
+                     expanded ? "h-auto" : "max-h-60 overflow-hidden"
+                 }`}
             >
                 <p className="text-base mb-4 whitespace-pre-line">
                     {props.body}

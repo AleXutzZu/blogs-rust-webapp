@@ -8,6 +8,7 @@ interface PaginatorProps {
     totalPosts: number,
     username: string,
     updateCallback: (posts: Post[]) => void;
+    updateLoading: (loading: boolean) => void;
 }
 
 function PaginatorPageButton({page, active, updatePage}: {
@@ -57,9 +58,10 @@ export function PostsPaginatorBar(props: PaginatorProps) {
         if (fetcher.data) props.updateCallback(fetcher.data.user.posts);
     }, [fetcher.data]);
 
-    const isLoading = fetcher.state !== "idle";
-
-    console.log(isLoading);
+    useEffect(() => {
+        if (fetcher.state === "idle") props.updateLoading(false);
+        else props.updateLoading(true);
+    }, [fetcher.state]);
 
     const start = Math.min((currentPage - 1) * POSTS_PER_PAGE + 1, props.totalPosts);
     const end = Math.min(start + POSTS_PER_PAGE - 1, props.totalPosts);
