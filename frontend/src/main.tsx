@@ -6,7 +6,7 @@ import PostsPage, {loader as postsLoader} from "./pages/PostsPage.tsx";
 import LoginPage, {action as loginAction, loader as loginLoader} from "./pages/LoginPage.tsx";
 import SignUpPage, {action as signUpAction} from "./pages/SignUpPage.tsx";
 import {authProvider} from "./auth.ts";
-import UserPage, {action as userAction, loader as userLoader, createPostAction} from "./pages/UserPage.tsx";
+import UserPage, {action as userAction, loader as userLoader} from "./pages/UserPage.tsx";
 import UserErrorPage from "./pages/UserErrorPage.tsx";
 import GlobalErrorPage from "./pages/GlobalErrorPage.tsx";
 import {StrictMode} from "react";
@@ -51,10 +51,6 @@ const router = createBrowserRouter([
             return redirect("/");
         }
     },
-    {
-        path: "/posts/create",
-        action: createPostAction,
-    }
 ])
 
 createRoot(document.getElementById('root')!).render(
