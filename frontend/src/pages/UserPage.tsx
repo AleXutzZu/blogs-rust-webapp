@@ -2,6 +2,7 @@ import {type ActionFunctionArgs, type LoaderFunctionArgs, useFetcher, useLoaderD
 import type {Post} from "../components/PostCard.tsx";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {PostsPaginatorBar} from "../components/Paginator.tsx";
+import {useAuthContext} from "../auth.ts";
 
 interface UserDTO {
     username: string,
@@ -45,7 +46,7 @@ export default function UserPage() {
     return (
         <div className="mx-auto w-full md:w-2/3 mt-24 px-4 md:px-0 max-w-4xl">
             <div className="flex items-center flex-col md:flex-row gap-4">
-                <EditableProfilePicture username={data.user.username}/>
+                <EditableProfilePicture/>
                 <p className="block font-bold text-3xl">{data.user.username}</p>
             </div>
             <hr className="my-4"/>
@@ -68,16 +69,17 @@ function UserProfilePost(props: Post) {
     );
 }
 
-function EditableProfilePicture({username}: { username: string }) {
-    const [stockPhoto, setStockPhoto] = useState(false);
-    const [avatarVersion, setAvatarVersion] = useState(Date.now());
+function EditableProfilePicture() {
+    const authMethods = useAuthContext();
     const fetcher = useFetcher();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const stockPhoto = authMethods.isStockPhoto();
+    const avatarLink = authMethods.getProfilePictureLink();
+
     useEffect(() => {
         if (fetcher.state === "idle" && fetcher.data) {
-            setAvatarVersion(Date.now());
-            setStockPhoto(false);
+            authMethods.updateProfilePictureLink();
         }
     }, [fetcher.state, fetcher.data]);
 
@@ -95,8 +97,8 @@ function EditableProfilePicture({username}: { username: string }) {
                       onClick={handleClick}>
 
             {!stockPhoto &&
-                <img src={`/api/users/${username}/avatar?version=${avatarVersion}`} alt="User Profile"
-                     onError={() => setStockPhoto(true)}
+                <img src={avatarLink} alt="User Profile"
+                     onError={() => authMethods.setStockPhoto(true)}
                      className="rounded-full"/>}
             {stockPhoto && <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
                                 stroke="currentColor"

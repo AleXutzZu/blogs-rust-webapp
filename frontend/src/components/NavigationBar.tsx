@@ -1,11 +1,14 @@
-import {Link, NavLink, useFetcher, useRouteLoaderData} from "react-router";
-import type {AuthUser} from "../auth.ts";
-import {useState} from "react";
+import {Link, NavLink, useFetcher} from "react-router";
+import {useAuthContext} from "../auth.ts";
 
 export default function NavigationBar() {
-    const {user} = useRouteLoaderData("root") as { user: AuthUser | null };
     const fetcher = useFetcher();
-    const [stockPhoto, setStockPhoto] = useState(false);
+    const authMethods = useAuthContext();
+
+    const user = authMethods.getLoggedUser();
+    const avatarLink = authMethods.getProfilePictureLink();
+    const stockPhoto = authMethods.isStockPhoto();
+
 
     return (
         <nav className="bg-blue-600 text-white shadow-lg px-4 py-3 flex items-center justify-between">
@@ -43,10 +46,10 @@ export default function NavigationBar() {
                               method="post" action="/logout">
 
                     {!stockPhoto && <img
-                        src={`/api/users/${user.username}/avatar`}
+                        src={avatarLink}
                         alt="Profile"
                         className="w-8 h-8 rounded-full object-cover border-2 border-white"
-                        onError={() => setStockPhoto(true)}
+                        onError={() => authMethods.setStockPhoto(true)}
                     />}
                     {stockPhoto &&
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
