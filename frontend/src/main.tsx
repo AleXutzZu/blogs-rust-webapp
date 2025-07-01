@@ -3,11 +3,10 @@ import './index.css'
 import MainLayout, {loader as mainLoader} from './pages/MainLayout.tsx'
 import {createBrowserRouter, redirect, RouterProvider} from "react-router";
 import PostsPage, {loader as postsLoader} from "./pages/PostsPage.tsx";
-import CreatePostPage, {action as createPostAction} from "./pages/CreatePostPage.tsx";
 import LoginPage, {action as loginAction, loader as loginLoader} from "./pages/LoginPage.tsx";
 import SignUpPage, {action as signUpAction} from "./pages/SignUpPage.tsx";
-import {authProvider, protectedLoaderWrapper} from "./auth.ts";
-import UserPage, {loader as userLoader, action as userAction} from "./pages/UserPage.tsx";
+import {authProvider} from "./auth.ts";
+import UserPage, {action as userAction, loader as userLoader, createPostAction} from "./pages/UserPage.tsx";
 import UserErrorPage from "./pages/UserErrorPage.tsx";
 import GlobalErrorPage from "./pages/GlobalErrorPage.tsx";
 import {StrictMode} from "react";
@@ -43,12 +42,6 @@ const router = createBrowserRouter([
                 action: userAction,
                 errorElement: <UserErrorPage/>
             },
-            {
-                path: "create",
-                element: <CreatePostPage/>,
-                loader: protectedLoaderWrapper(),
-                action: createPostAction,
-            }
         ]
     },
     {
@@ -57,6 +50,10 @@ const router = createBrowserRouter([
             await authProvider.signOut();
             return redirect("/");
         }
+    },
+    {
+        path: "/posts/create",
+        action: createPostAction,
     }
 ])
 
