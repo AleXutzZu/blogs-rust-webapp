@@ -10,6 +10,7 @@ import {FormProvider, useForm, useFormContext} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {EditableProfilePicture, ViewerProfilePicture} from "../components/ProfilePicture.tsx";
 import toast from "react-hot-toast";
+import {format} from "date-fns";
 
 interface UserDTO {
     username: string,
@@ -94,14 +95,39 @@ export default function UserPage() {
 }
 
 function UserProfilePost(props: Post) {
-    //TODO: make it similar to the PostCard in the sense that it expands and it also renders the posts picture
-    // Also add the ability to delete a post if the current user is logged in
+    const [expanded, setExpanded] = useState(false);
+    const [imageError, setImageError] = useState(false);
+
     return (
-        <div className="w-full rounded-xl shadow-lg px-8 py-6 flex flex-col space-y-2 max-h-80">
-            <h1 className="font-bold text-2xl">{props.title}</h1>
-            <div className="overflow-hidden">
-                <p>{props.body}</p>
+        <div className="relative w-full mx-auto my-6 p-4 rounded-2xl shadow-lg bg-white min-w-xs">
+            <h2 className="text-2xl font-semibold">{props.title}</h2>
+            <p className="text-sm mb-2">{format(props.date, "MMM do yyyy p")}</p>
+            <div
+                className={`transition-all duration-500 ${
+                    expanded ? "h-auto" : "max-h-60 overflow-hidden"
+                }`}
+            >
+                <p className="text-base mb-4 whitespace-pre-line">
+                    {props.body}
+                </p>
+                {!imageError && <img
+                    src={`/api/posts/${props.id}/image`}
+                    alt="PostCard image"
+                    className="rounded-lg w-full mb-4"
+                    onError={() => setImageError(true)}
+                />}
             </div>
+
+            {!expanded && (
+                <div className="text-center mt-2">
+                    <button
+                        onClick={() => setExpanded(true)}
+                        className="px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md shadow-sm hover:bg-gray-100 transition"
+                    >
+                        Read more...
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
