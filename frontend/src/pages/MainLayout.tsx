@@ -11,7 +11,7 @@ function MainLayout() {
     const data = useLoaderData<typeof loader>();
 
     useEffect(() => {
-        document.title = "RustyPosts"
+        document.title = "RustyPosts | Main Page"
     }, []);
 
     useEffect(() => {
