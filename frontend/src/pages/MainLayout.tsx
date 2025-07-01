@@ -17,11 +17,11 @@ function MainLayout() {
 
     useEffect(() => {
         const date = Date.now();
-        if (!data.user) setProfilePicture("");
+        if (!data.user) setProfilePicture(null);
         else setProfilePicture(`/api/users/${data.user?.username}/avatar?v=${date}`);
     }, [data]);
 
-    const [profilePicture, setProfilePicture] = useState("");
+    const [profilePicture, setProfilePicture] = useState<string | null>(null);
     const [stockPhoto, setStockPhoto] = useState(false);
 
     const getLoggedUser = useCallback(() => {
@@ -34,7 +34,7 @@ function MainLayout() {
 
     const updateProfilePictureLink = useCallback(() => {
         const date = Date.now();
-        if (!data.user) setProfilePicture("");
+        if (!data.user) setProfilePicture(null);
         else setProfilePicture(`/api/users/${data.user?.username}/avatar?v=${date}`);
         setStockPhoto(false);
     }, [data]);

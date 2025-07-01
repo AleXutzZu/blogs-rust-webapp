@@ -114,7 +114,7 @@ export const protectedLoaderWrapper = (loader?: LoaderFunction<any>) => {
 export interface AuthContextMethods {
     getLoggedUser: () => AuthUser | null,
     updateProfilePictureLink: () => void,
-    getProfilePictureLink: () => string,
+    getProfilePictureLink: () => string | null,
     isStockPhoto: () => boolean,
     setStockPhoto: (state: boolean) => void
 }
