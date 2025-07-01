@@ -21,15 +21,6 @@ export default function NavigationBar() {
                 >
                     All Posts
                 </NavLink>
-
-                <NavLink
-                    to="/create"
-                    className={({isActive}) =>
-                        `text-white hover:text-blue-100 font-medium ${isActive ? 'underline' : ''}`
-                    }
-                >
-                    Create Post
-                </NavLink>
             </div>
             {!user && (
                 <NavLink
