@@ -7,7 +7,6 @@ export async function loader() {
     const user = await authProvider.checkAuth();
     return {user: user}
 }
-//TODO: Add some logic to handle null user because its username results in undefined
 function MainLayout() {
     const data = useLoaderData<typeof loader>();
 
@@ -17,10 +16,11 @@ function MainLayout() {
 
     useEffect(() => {
         const date = Date.now();
-        setProfilePicture(`/api/users/${data.user?.username}/avatar?v=${date}`);
+        if (!data.user) setProfilePicture("");
+        else setProfilePicture(`/api/users/${data.user?.username}/avatar?v=${date}`);
     }, [data]);
 
-    const [profilePicture, setProfilePicture] = useState(`/api/users/${data.user?.username}/avatar`);
+    const [profilePicture, setProfilePicture] = useState("");
     const [stockPhoto, setStockPhoto] = useState(false);
 
     const getLoggedUser = useCallback(() => {
@@ -33,7 +33,8 @@ function MainLayout() {
 
     const updateProfilePictureLink = useCallback(() => {
         const date = Date.now();
-        setProfilePicture(`/api/users/${data.user?.username}/avatar?v=${date}`);
+        if (!data.user) setProfilePicture("");
+        else setProfilePicture(`/api/users/${data.user?.username}/avatar?v=${date}`);
         setStockPhoto(false);
     }, [data]);
 
