@@ -37,16 +37,20 @@ export async function action({params, request}: ActionFunctionArgs) {
 
 export default function UserPage() {
     const data = useLoaderData<typeof loader>();
+    const authMethods = useAuthContext();
     const [posts, setPosts] = useState<Post[]>(data.user.posts);
 
     const updatePosts = useCallback((posts: Post[]) => {
         setPosts(posts);
     }, []);
 
+    const user = authMethods.getLoggedUser();
+
     return (
         <div className="mx-auto w-full md:w-2/3 mt-24 px-4 md:px-0 max-w-4xl">
             <div className="flex items-center flex-col md:flex-row gap-4">
-                <EditableProfilePicture/>
+                {user && <EditableProfilePicture/>}
+                {!user && <ViewerProfilePicture username={data.user.username}/>}
                 <p className="block font-bold text-3xl">{data.user.username}</p>
             </div>
             <hr className="my-4"/>
@@ -67,6 +71,27 @@ function UserProfilePost(props: Post) {
             </div>
         </div>
     );
+}
+
+function ViewerProfilePicture(props: { username: string }) {
+    const [stockPhoto, setStockPhoto] = useState(false);
+
+    return (
+        <div
+            className="size-48 rounded-full border-2 p-2">
+            {!stockPhoto &&
+                <img src={`/api/users/${props.username}/avatar`} alt="User Profile"
+                     onError={() => setStockPhoto(true)}
+                     className="rounded-full"/>}
+            {stockPhoto && <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
+                                stroke="currentColor"
+                                className="w-full stroke-gray-700">
+                <path strokeLinecap="round" strokeLinejoin="round"
+                      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
+            </svg>}
+
+        </div>
+    )
 }
 
 function EditableProfilePicture() {
