@@ -37,7 +37,7 @@ export default function NavigationBar() {
                               method="post" action="/logout">
 
                     {!stockPhoto && <img
-                        src={avatarLink}
+                        src={avatarLink?? undefined}
                         alt="Profile"
                         className="w-8 h-8 rounded-full object-cover border-2 border-white"
                         onError={() => authMethods.setStockPhoto(true)}
