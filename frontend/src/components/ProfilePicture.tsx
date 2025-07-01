@@ -1,6 +1,8 @@
 import {useEffect, useRef, useState} from "react";
 import {useAuthContext} from "../auth.ts";
-import {useFetcher} from "react-router";
+import {Form, useActionData} from "react-router";
+import type {UserActionResult} from "../pages/UserPage.tsx";
+import toast from "react-hot-toast";
 
 export function ViewerProfilePicture(props: { username: string }) {
     const [stockPhoto, setStockPhoto] = useState(false);
@@ -25,17 +27,22 @@ export function ViewerProfilePicture(props: { username: string }) {
 
 export function EditableProfilePicture() {
     const authMethods = useAuthContext();
-    const fetcher = useFetcher();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const actionData = useActionData() as UserActionResult | undefined;
 
     const stockPhoto = authMethods.isStockPhoto();
     const avatarLink = authMethods.getProfilePictureLink();
 
     useEffect(() => {
-        if (fetcher.state === "idle" && fetcher.data) {
+        if (actionData?.type != "avatar") return;
+
+        if (actionData.success) {
             authMethods.updateProfilePictureLink();
+            toast.success("Profile picture has been updated successfully", {removeDelay: 5000, position: "top-right"});
+        } else {
+            toast.error("An error occurred: " + actionData.error);
         }
-    }, [fetcher.state, fetcher.data]);
+    }, [actionData]);
 
     const handleClick = () => {
         fileInputRef.current?.click();
@@ -46,12 +53,12 @@ export function EditableProfilePicture() {
     }
 
     return (
-        <fetcher.Form method="post" encType="multipart/form-data"
-                      className="size-48 rounded-full border-2 p-2 hover:cursor-pointer relative group"
-                      onClick={handleClick}>
+        <Form method="post" encType="multipart/form-data"
+              className="size-48 rounded-full border-2 p-2 hover:cursor-pointer relative group"
+              onClick={handleClick}>
 
             {!stockPhoto &&
-                <img src={avatarLink?? undefined} alt="User Profile"
+                <img src={avatarLink ?? undefined} alt="User Profile"
                      onError={() => authMethods.setStockPhoto(true)}
                      className="rounded-full"/>}
             {stockPhoto && <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
@@ -68,6 +75,6 @@ export function EditableProfilePicture() {
             <span
                 className="absolute inset-0 flex items-center justify-center
                  text-white opacity-0 group-hover:opacity-100 transition duration-300 font-bold text-lg">Change</span>
-        </fetcher.Form>
+        </Form>
     );
 }

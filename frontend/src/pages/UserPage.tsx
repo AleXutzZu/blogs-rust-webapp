@@ -30,13 +30,13 @@ export async function loader({params, request}: LoaderFunctionArgs) {
     return {user, page};
 }
 
-type ActionResult = {
+export type UserActionResult = {
     success: boolean,
     error?: string,
     type: "post" | "avatar"
 }
 
-export async function action({params, request}: ActionFunctionArgs): Promise<ActionResult> {
+export async function action({params, request}: ActionFunctionArgs): Promise<UserActionResult> {
     const formData = await request.formData();
 
     const type = formData.get("type") as string;
@@ -117,7 +117,7 @@ function CreatePostDialogOpener() {
     const handleClick = () => setOpenModal(true);
     const submit = useSubmit();
 
-    const actionData = useActionData() as ActionResult | undefined;
+    const actionData = useActionData() as UserActionResult | undefined;
 
     const validationSchema = Yup.object({
         title: Yup.string().required("Title is required"),
