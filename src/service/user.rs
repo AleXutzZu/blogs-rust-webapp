@@ -24,16 +24,16 @@ impl UserService {
         self.user_repository.fetch_all_users().await
     }
 
-    pub async fn get_user_by_username(&self, username: &str) -> AppResult<Option<User>> {
+    pub async fn get_user_by_username(&self, username: String) -> AppResult<Option<User>> {
         self.user_repository
-            .get_user_by_username(username.to_string())
+            .get_user_by_username(username)
             .await
     }
 
-    pub async fn login(&self, username: &str, password: &str) -> AppResult<uuid::Uuid> {
+    pub async fn login(&self, username: String, password: String) -> AppResult<uuid::Uuid> {
         let user = self
             .user_repository
-            .get_user_by_username(username.to_string())
+            .get_user_by_username(username.clone())
             .await?;
 
         if let Some(result) = user {
@@ -44,7 +44,7 @@ impl UserService {
                         let session_id = uuid::Uuid::new_v4();
 
                         let session: Session = Session {
-                            username: username.to_string(),
+                            username,
                             session_id: session_id.to_string(),
                         };
                         self.session_repository.add_session(session).await?;
@@ -71,12 +71,12 @@ impl UserService {
             .await
     }
 
-    pub async fn create_user(&self, username: &str, password: &str) -> AppResult<()> {
+    pub async fn create_user(&self, username: String, password: String) -> AppResult<()> {
         let hashed_pass = bcrypt::hash(password, DEFAULT_COST)?;
 
         self.user_repository
             .create_new_user(User {
-                username: username.to_string(),
+                username,
                 password: hashed_pass,
                 avatar: None,
                 joined: Utc::now().date_naive(),
@@ -85,11 +85,11 @@ impl UserService {
         Ok(())
     }
 
-    pub async fn update_user_avatar(&self, username: &str, avatar: &[u8]) -> AppResult<()> {
+    pub async fn update_user_avatar(&self, username: String, avatar: Vec<u8>) -> AppResult<()> {
         let payload = UpdateUser {
-            username: Some(username.to_string()),
+            username: Some(username),
             password: None,
-            avatar: Some(avatar.to_vec()),
+            avatar: Some(avatar),
         };
 
         self.user_repository.update_user(payload).await?;
@@ -97,7 +97,7 @@ impl UserService {
         Ok(())
     }
 
-    pub async fn get_user_avatar(&self, username: &str) -> AppResult<Option<Vec<u8>>> {
+    pub async fn get_user_avatar(&self, username: String) -> AppResult<Option<Vec<u8>>> {
         let user = self.get_user_by_username(username).await?;
         match user {
             None => Ok(None),

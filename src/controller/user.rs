@@ -22,7 +22,7 @@ pub async fn login_user(
 ) -> AppResult<(CookieJar, StatusCode)> {
     let uuid = state
         .user_service
-        .login(&form.username, &form.password)
+        .login(form.username, form.password)
         .await?;
 
     let cookie = Cookie::build(("session_id", uuid.to_string()))
@@ -84,7 +84,7 @@ pub async fn signup_user(
 ) -> AppResult<StatusCode> {
     state
         .user_service
-        .create_user(&form.username, &form.password)
+        .create_user(form.username, form.password)
         .await?;
     Ok(StatusCode::NO_CONTENT)
 }
@@ -99,13 +99,13 @@ pub async fn get_user_with_posts(
     Path(username): Path<String>,
     Query(params): Query<PaginatedPostSearch>,
 ) -> JsonResult<Option<UserDTO>> {
-    let user = state.user_service.get_user_by_username(&username).await?;
+    let user = state.user_service.get_user_by_username(username.clone()).await?;
     match user {
         None => Err(NotFoundError("Could not find user".to_string())),
         Some(u) => {
             let count = state
                 .post_service
-                .get_post_count_by_username(&username)
+                .get_post_count_by_username(username)
                 .await?;
             let posts = state
                 .post_service
@@ -170,7 +170,7 @@ pub async fn update_user(
     if let Some(avatar) = avatar {
         state
             .user_service
-            .update_user_avatar(&username, &avatar)
+            .update_user_avatar(username, avatar)
             .await?;
     }
 
@@ -181,7 +181,7 @@ pub async fn get_user_avatar(
     State(state): State<AppState>,
     Path(username): Path<String>,
 ) -> AppResult<impl IntoResponse> {
-    let result = state.user_service.get_user_avatar(&username).await?;
+    let result = state.user_service.get_user_avatar(username).await?;
 
     let content_type = "image/png";
 

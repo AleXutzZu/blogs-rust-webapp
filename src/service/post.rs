@@ -53,7 +53,7 @@ impl PostService {
         self.post_repository.get_posts_by_username(user, page).await
     }
     
-    pub async fn get_post_count_by_username(&self, username: &str) -> AppResult<i64> {
-        self.post_repository.get_post_count_by_username(username.to_string()).await
+    pub async fn get_post_count_by_username(&self, username: String) -> AppResult<i64> {
+        self.post_repository.get_post_count_by_username(username).await
     }
 }
