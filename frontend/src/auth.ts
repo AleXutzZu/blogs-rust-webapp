@@ -1,5 +1,6 @@
 import type {LoaderFunction, LoaderFunctionArgs} from "react-router";
 import {redirect} from "react-router"
+import {createContext, useContext} from "react";
 
 export interface AuthUser {
     username: string;
@@ -64,7 +65,7 @@ export const authProvider: AuthProvider = {
             credentials: "include",
             method: "POST"
         });
-        
+
         if (response.status == 204) {
             await this.checkAuth();
             return {success: true};
@@ -108,4 +109,20 @@ export const protectedLoaderWrapper = (loader?: LoaderFunction<any>) => {
 
         return loader(args);
     }
+}
+
+export interface AuthContextMethods {
+    getLoggedUser: () => AuthUser | null,
+    updateProfilePictureLink: () => void,
+    getProfilePictureLink: () => string,
+    isStockPhoto: () => boolean,
+    setStockPhoto: (state: boolean) => void
+}
+
+export const AuthContext = createContext<AuthContextMethods | null>(null);
+
+export const useAuthContext = () : AuthContextMethods => {
+    const methods = useContext(AuthContext);
+    if (!methods) throw new Error("Context cannot be null");
+    return methods;
 }
