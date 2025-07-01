@@ -1,8 +1,15 @@
-import {type ActionFunctionArgs, type LoaderFunctionArgs, useFetcher, useLoaderData} from "react-router";
+import {type ActionFunctionArgs, type LoaderFunctionArgs, useActionData, useLoaderData, useSubmit} from "react-router";
 import type {Post} from "../components/PostCard.tsx";
-import {useCallback, useEffect, useRef, useState} from "react";
+import {type HTMLInputTypeAttribute, useCallback, useEffect, useState} from "react";
 import {PostsPaginatorBar} from "../components/Paginator.tsx";
 import {useAuthContext} from "../auth.ts";
+import ReactModal from "react-modal";
+import type {ObjectSchema} from "yup";
+import * as Yup from "yup";
+import {FormProvider, useForm, useFormContext} from "react-hook-form";
+import {yupResolver} from "@hookform/resolvers/yup";
+import {EditableProfilePicture, ViewerProfilePicture} from "../components/ProfilePicture.tsx";
+import toast from "react-hot-toast";
 
 interface UserDTO {
     username: string,
@@ -23,8 +30,30 @@ export async function loader({params, request}: LoaderFunctionArgs) {
     return {user, page};
 }
 
-export async function action({params, request}: ActionFunctionArgs) {
+type ActionResult = {
+    success: boolean,
+    error?: string,
+    type: "post" | "avatar"
+}
+
+export async function action({params, request}: ActionFunctionArgs): Promise<ActionResult> {
     const formData = await request.formData();
+
+    const type = formData.get("type") as string;
+
+    if (type === "post") {
+        const result = await fetch("/api/posts/create", {
+            method: "POST",
+            body: formData,
+            credentials: "include",
+        });
+
+        if (!result.ok) {
+            return {success: false, error: "TODO: Comprehensive error here.", type: "post"}
+        }
+
+        return {success: true, type: "post"};
+    }
 
     const result = await fetch(`/api/users/${params.username}`, {
         method: "POST",
@@ -32,7 +61,8 @@ export async function action({params, request}: ActionFunctionArgs) {
         credentials: "include",
     });
 
-    if (result.ok) return {success: true};
+    if (result.ok) return {success: true, type: "avatar"};
+    return {success: false, error: "TODO", type: "avatar"};
 }
 
 export default function UserPage() {
@@ -49,20 +79,23 @@ export default function UserPage() {
     return (
         <div className="mx-auto w-full md:w-2/3 mt-24 px-4 md:px-0 max-w-4xl">
             <div className="flex items-center flex-col md:flex-row gap-4">
-                {user && <EditableProfilePicture/>}
-                {!user && <ViewerProfilePicture username={data.user.username}/>}
+                {user && user.username == data.user.username && <EditableProfilePicture/>}
+                {!user || user.username !== data.user.username && <ViewerProfilePicture username={data.user.username}/>}
                 <p className="block font-bold text-3xl">{data.user.username}</p>
             </div>
             <hr className="my-4"/>
             <div className="flex flex-col space-y-6 items-center w-full">
                 <PostsPaginatorBar totalPosts={data.user.totalPosts} initialPosts={data.user.posts}
                                    username={data.user.username} updateCallback={updatePosts}/>
+                {user && user.username == data.user.username && <CreatePostDialogOpener/>}
                 {posts.map(post => <UserProfilePost {...post} key={post.id}/>)}
             </div>
         </div>);
 }
 
 function UserProfilePost(props: Post) {
+    //TODO: make it similar to the PostCard in the sense that it expands and it also renders the posts picture
+    // Also add the ability to delete a post if the current user is logged in
     return (
         <div className="w-full rounded-xl shadow-lg px-8 py-6 flex flex-col space-y-2 max-h-80">
             <h1 className="font-bold text-2xl">{props.title}</h1>
@@ -73,72 +106,147 @@ function UserProfilePost(props: Post) {
     );
 }
 
-function ViewerProfilePicture(props: { username: string }) {
-    const [stockPhoto, setStockPhoto] = useState(false);
+type PostForm = {
+    title: string,
+    body: string,
+    image?: FileList
+}
+
+function CreatePostDialogOpener() {
+    const [openModal, setOpenModal] = useState(false);
+    const handleClick = () => setOpenModal(true);
+    const submit = useSubmit();
+
+    const actionData = useActionData() as ActionResult | undefined;
+
+    const validationSchema = Yup.object({
+        title: Yup.string().required("Title is required"),
+        body: Yup.string().required("Body is required"),
+        image: Yup.mixed<FileList>().optional()
+            .test("fileSize", "Image is too large", value => {
+                if (!value?.[0]) return true;
+                return value[0].size < 5 * 1024 * 1024;
+            })
+            .test("fileType", "Unsupported file type", value => {
+                if (!value?.[0]) return true;
+                return value[0].type == "image/png";
+            })
+    }) as ObjectSchema<PostForm>;
+
+    const methods = useForm<PostForm>({
+        resolver: yupResolver(validationSchema),
+        mode: "onBlur"
+    });
+
+    const onSubmit = async (data: PostForm) => {
+        const file = data.image?.[0];
+
+        const formData = new FormData();
+        formData.append("title", data.title);
+        formData.append("body", data.body);
+        formData.append("type", "post");
+        if (file) formData.append("image", file);
+
+        await submit(formData, {
+            method: "post",
+            encType: "multipart/form-data",
+        });
+    };
+
+    useEffect(() => {
+        if (actionData?.success && actionData?.type == "post") {
+            setOpenModal(false);
+            toast.success("Post published", {removeDelay: 5000, position: "top-right"});
+            methods.reset();
+        }
+    }, [actionData]);
 
     return (
-        <div
-            className="size-48 rounded-full border-2 p-2">
-            {!stockPhoto &&
-                <img src={`/api/users/${props.username}/avatar`} alt="User Profile"
-                     onError={() => setStockPhoto(true)}
-                     className="rounded-full"/>}
-            {stockPhoto && <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
-                                stroke="currentColor"
-                                className="w-full stroke-gray-700">
-                <path strokeLinecap="round" strokeLinejoin="round"
-                      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
-            </svg>}
+        <>
+            <div className="w-full px-16 py-4 rounded-2xl shadow-lg flex items-center space-x-0.5 cursor-pointer"
+                 onClick={handleClick}>
+                <p className="font-semibold text-gray-600 italic">Start a new post...</p>
+            </div>
+            <ReactModal isOpen={openModal} shouldCloseOnEsc={true} onRequestClose={() => setOpenModal(false)}
+                        className="posts-modal-content">
+                <FormProvider {...methods}>
 
-        </div>
+                    <form
+                        onSubmit={methods.handleSubmit(onSubmit)}
+                        className="p-6 bg-white rounded-2xl shadow-md space-y-4"
+                    >
+                        <h2 className="text-2xl font-semibold mb-2">Create a Post</h2>
+
+                        <div>
+                            <PostInput name={"title"} type={"text"} label="Title"
+                                       className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg
+                           focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                        </div>
+
+                        <div>
+                            <PostTextArea name={"body"} label="Body"/>
+                        </div>
+
+                        <div>
+                            <PostInput name={"image"} type={"file"} accept={"image/png"} label="Upload image"
+                                       className="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2
+                           file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                            file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+
+                        </div>
+
+                        <div className="text-right">
+                            <button
+                                type="submit"
+                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                            >
+                                Publish
+                            </button>
+                        </div>
+                    </form>
+                </FormProvider>
+            </ReactModal>
+        </>
+
     )
 }
 
-function EditableProfilePicture() {
-    const authMethods = useAuthContext();
-    const fetcher = useFetcher();
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const stockPhoto = authMethods.isStockPhoto();
-    const avatarLink = authMethods.getProfilePictureLink();
-
-    useEffect(() => {
-        if (fetcher.state === "idle" && fetcher.data) {
-            authMethods.updateProfilePictureLink();
-        }
-    }, [fetcher.state, fetcher.data]);
-
-    const handleClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleChange = () => {
-        fileInputRef.current?.form?.requestSubmit();
-    }
+function PostInput(props: {
+    name: keyof PostForm,
+    type: HTMLInputTypeAttribute,
+    className?: string,
+    accept?: string,
+    label: string
+}) {
+    const {register} = useFormContext<PostForm>();
 
     return (
-        <fetcher.Form method="post" encType="multipart/form-data"
-                      className="size-48 rounded-full border-2 p-2 hover:cursor-pointer relative group"
-                      onClick={handleClick}>
+        <>
+            <label htmlFor={props.name} className="block text-sm font-medium text-gray-700">
+                {props.label}
+            </label>
+            <input
+                {...register(props.name)} type={props.type}
+                className={props.className}
+                accept={props.accept}
+            />
+        </>
+    );
+}
 
-            {!stockPhoto &&
-                <img src={avatarLink} alt="User Profile"
-                     onError={() => authMethods.setStockPhoto(true)}
-                     className="rounded-full"/>}
-            {stockPhoto && <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
-                                stroke="currentColor"
-                                className="w-full stroke-gray-700 transition-all ease-in duration-150 hover:brightness-75">
-                <path strokeLinecap="round" strokeLinejoin="round"
-                      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
-            </svg>}
+function PostTextArea(props: { name: keyof PostForm, label: string }) {
+    const {register} = useFormContext<PostForm>();
 
-            <input className="hidden" type="file" accept="image/png" ref={fileInputRef} onChange={handleChange}
-                   name="avatar"/>
-            <div
-                className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition duration-300"/>
-            <span
-                className="absolute inset-0 flex items-center justify-center
-                 text-white opacity-0 group-hover:opacity-100 transition duration-300 font-bold text-lg">Change</span>
-        </fetcher.Form>
+    return (
+        <>
+            <label htmlFor={props.name} className="block text-sm font-medium text-gray-700">
+                {props.label}
+            </label>
+            <textarea
+                {...register(props.name)}
+                rows={5}
+                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 h-64"
+            />
+        </>
     );
 }
