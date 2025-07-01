@@ -1,6 +1,6 @@
 import {createRoot} from 'react-dom/client'
 import './index.css'
-import MainLayout from './pages/MainLayout.tsx'
+import MainLayout, {loader as mainLoader} from './pages/MainLayout.tsx'
 import {createBrowserRouter, redirect, RouterProvider} from "react-router";
 import PostsPage, {loader as postsLoader} from "./pages/PostsPage.tsx";
 import CreatePostPage, {action as createPostAction} from "./pages/CreatePostPage.tsx";
@@ -8,16 +8,17 @@ import LoginPage, {action as loginAction, loader as loginLoader} from "./pages/L
 import SignUpPage, {action as signUpAction} from "./pages/SignUpPage.tsx";
 import {authProvider, protectedLoaderWrapper} from "./auth.ts";
 import UserPage, {loader as userLoader, action as userAction} from "./pages/UserPage.tsx";
+import UserErrorPage from "./pages/UserErrorPage.tsx";
+import GlobalErrorPage from "./pages/GlobalErrorPage.tsx";
+import {StrictMode} from "react";
 
 const router = createBrowserRouter([
     {
         path: "/",
         element: <MainLayout/>,
-        async loader() {
-            const user = await authProvider.checkAuth();
-            return {user: user}
-        },
+        loader: mainLoader,
         id: "root",
+        errorElement: <GlobalErrorPage/>,
         children: [
             {
                 index: true,
@@ -39,7 +40,8 @@ const router = createBrowserRouter([
                 path: "users/:username",
                 element: <UserPage/>,
                 loader: userLoader,
-                action: userAction
+                action: userAction,
+                errorElement: <UserErrorPage/>
             },
             {
                 path: "create",
@@ -59,5 +61,7 @@ const router = createBrowserRouter([
 ])
 
 createRoot(document.getElementById('root')!).render(
-    <RouterProvider router={router}/>
+    <StrictMode>
+        <RouterProvider router={router}/>
+    </StrictMode>
 )

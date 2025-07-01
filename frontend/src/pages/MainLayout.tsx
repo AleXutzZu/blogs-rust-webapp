@@ -1,15 +1,65 @@
-import {Outlet} from "react-router"
+import {Outlet, useLoaderData} from "react-router"
 import NavigationBar from "../components/NavigationBar.tsx";
+import {useCallback, useEffect, useState} from "react";
+import {AuthContext, type AuthContextMethods, authProvider, type AuthUser} from "../auth.ts";
 
+export async function loader() {
+    const user = await authProvider.checkAuth();
+    return {user: user}
+}
+//TODO: Add some logic to handle null user because its username results in undefined
 function MainLayout() {
+    const data = useLoaderData<typeof loader>();
+
+    useEffect(() => {
+        document.title = "RustyPosts"
+    }, []);
+
+    useEffect(() => {
+        const date = Date.now();
+        setProfilePicture(`/api/users/${data.user?.username}/avatar?v=${date}`);
+    }, [data]);
+
+    const [profilePicture, setProfilePicture] = useState(`/api/users/${data.user?.username}/avatar`);
+    const [stockPhoto, setStockPhoto] = useState(false);
+
+    const getLoggedUser = useCallback(() => {
+        return data.user as AuthUser | null;
+    }, [data]);
+
+    const getProfilePictureLink = useCallback(() => {
+        return profilePicture;
+    }, [profilePicture]);
+
+    const updateProfilePictureLink = useCallback(() => {
+        const date = Date.now();
+        setProfilePicture(`/api/users/${data.user?.username}/avatar?v=${date}`);
+        setStockPhoto(false);
+    }, [data]);
+
+    const isStockPhoto = useCallback(() => {
+        return stockPhoto;
+    }, [stockPhoto]);
+
+    const stockPhotoSetter = useCallback((state: boolean) => {
+        setStockPhoto(state);
+    }, []);
+
+    const methods: AuthContextMethods = {
+        getLoggedUser,
+        getProfilePictureLink,
+        updateProfilePictureLink,
+        isStockPhoto,
+        setStockPhoto: stockPhotoSetter
+    }
 
     return (
-        <>
+        <AuthContext.Provider value={methods}>
             <NavigationBar/>
             <main className="grow flex bg-gray-50">
                 <Outlet/>
             </main>
-        </>
+        </AuthContext.Provider>
     )
 }
 
