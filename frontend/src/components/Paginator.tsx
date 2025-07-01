@@ -10,7 +10,6 @@ interface PaginatorProps {
     username: string,
     updateCallback: (posts: Post[]) => void;
 }
-
 function PaginatorPageButton({page, active, updatePage}: {
     page: number,
     active: boolean,
@@ -48,7 +47,7 @@ export function PostsPaginatorBar(props: PaginatorProps) {
 
     const fetcher = useFetcher();
 
-    const currentPage = Number(searchParams.get("page") || 1);
+    const currentPage = Math.min(Number(searchParams.get("page") || 1), totalPages);
 
     useEffect(() => {
         if (currentPage === 1) {
@@ -86,39 +85,39 @@ export function PostsPaginatorBar(props: PaginatorProps) {
     //Preparing buttons
     if (totalPages <= 9) {
         for (let i = 1; i <= totalPages; ++i) {
-            pageButtons.push(<PaginatorPageButton page={i} active={i == currentPage} updatePage={handleButtonClick}/>);
+            pageButtons.push(<PaginatorPageButton page={i} active={i == currentPage} updatePage={handleButtonClick} key={i}/>);
         }
     } else {
         //Put first 3 and last 3
         let foundPage = false;
         for (let i = 1; i <= 3; ++i) {
-            pageButtons.push(<PaginatorPageButton page={i} active={i == currentPage} updatePage={handleButtonClick}/>);
+            pageButtons.push(<PaginatorPageButton page={i} active={i == currentPage} updatePage={handleButtonClick} key={i}/>);
             if (i == currentPage) foundPage = true;
         }
 
         for (let i = totalPages - 2; i <= totalPages; ++i) {
-            pageButtons.push(<PaginatorPageButton page={i} active={i == currentPage} updatePage={handleButtonClick}/>);
+            pageButtons.push(<PaginatorPageButton page={i} active={i == currentPage} updatePage={handleButtonClick} key={i}/>);
             if (i == currentPage) foundPage = true;
         }
         //Means we can put a single ...
         if (foundPage) {
-            pageButtons.splice(3, 0, <PaginatorSpan/>);
+            pageButtons.splice(3, 0, <PaginatorSpan key={totalPages + 1}/>);
         } else {
             //This page must be inserted between the first and last 3
-            pageButtons.splice(3, 0, <PaginatorPageButton page={currentPage} active updatePage={handleButtonClick}/>);
+            pageButtons.splice(3, 0, <PaginatorPageButton page={currentPage} active updatePage={handleButtonClick} key={totalPages + 2}/>);
 
             //Now we need to check how many we have on the left and right so we have an idea if we need to insert a span
-            if (currentPage - 3 > 2) pageButtons.splice(3, 0, <PaginatorSpan/>);
+            if (currentPage - 3 > 2) pageButtons.splice(3, 0, <PaginatorSpan key={totalPages + 3}/>);
             else {
                 if (currentPage - 3 == 2) pageButtons.splice(3, 0, <PaginatorPageButton
-                    page={currentPage - 1} active={false} updatePage={handleButtonClick}/>);
+                    page={currentPage - 1} active={false} updatePage={handleButtonClick} key={totalPages + 4}/>);
             }
 
             //Same story but on the other side
-            if (totalPages - 2 - currentPage > 2) pageButtons.splice(-3, 0, <PaginatorSpan/>);
+            if (totalPages - 2 - currentPage > 2) pageButtons.splice(-3, 0, <PaginatorSpan key={totalPages + 5}/>);
             else {
                 if (totalPages - 2 - currentPage == 2) pageButtons.splice(-3, 0, <PaginatorPageButton
-                    page={currentPage + 1} active={false} updatePage={handleButtonClick}/>);
+                    page={currentPage + 1} active={false} updatePage={handleButtonClick} key={totalPages + 6}/>);
             }
         }
     }
