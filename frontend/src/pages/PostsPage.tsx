@@ -1,8 +1,8 @@
-import PostCard , {type Post} from "../components/PostCard.tsx";
+import PostCard, {type Post} from "../components/PostCard.tsx";
 import {useLoaderData} from "react-router";
 
 export async function loader() {
-    return await fetch("api/posts").then(res => res.json()).then(values => values as Post[]);
+    return await fetch("/api/posts").then(res => res.json()).then(values => values as Post[]);
 }
 
 export default function PostsPage() {
