@@ -1,5 +1,5 @@
 use crate::error::AppError::{InternalError, LoginError};
-use crate::error::{AppError, AppResult};
+use crate::error::AppResult;
 use crate::model::session::Session;
 use crate::model::user::{UpdateUser, User};
 use crate::repository::session::SessionRepository;
@@ -19,10 +19,7 @@ impl UserService {
             session_repository,
         }
     }
-
-    pub async fn get_users(&self) -> Result<Vec<User>, AppError> {
-        self.user_repository.fetch_all_users().await
-    }
+    
 
     pub async fn get_user_by_username(&self, username: String) -> AppResult<Option<User>> {
         self.user_repository

@@ -14,19 +14,7 @@ impl UserRepository {
     pub fn new(connection_pool: Pool<Manager, Object>) -> Self {
         Self { connection_pool }
     }
-
-    pub async fn fetch_all_users(&self) -> AppResult<Vec<User>> {
-        use crate::schema::users::dsl::*;
-
-        let conn = self.connection_pool.get().await?;
-
-        let results = conn
-            .interact(|conn| users.select(User::as_select()).load::<User>(conn))
-            .await??;
-
-        Ok(results)
-    }
-
+    
     pub async fn create_new_user(&self, user: User) -> AppResult<()> {
         use crate::schema::users::dsl::*;
         let conn = self.connection_pool.get().await?;
