@@ -1,5 +1,5 @@
 use crate::error::AppError::{InternalError, NotFoundError};
-use crate::error::AppResult;
+use crate::error::{AppResult, JsonResult};
 use crate::model::post::Post;
 use crate::AppState;
 use axum::extract::{Path, State};
@@ -8,7 +8,7 @@ use axum::response::IntoResponse;
 use axum::Json;
 use axum_extra::extract::{CookieJar, Multipart};
 
-pub async fn get_posts(State(state): State<AppState>) -> AppResult<Json<Vec<Post>>> {
+pub async fn get_posts(State(state): State<AppState>) -> JsonResult<Vec<Post>> {
     let result = state.post_service.get_all_posts().await?;
 
     Ok(Json(result))
@@ -17,7 +17,7 @@ pub async fn get_posts(State(state): State<AppState>) -> AppResult<Json<Vec<Post
 pub async fn get_post(
     Path(post_id): Path<i32>,
     State(state): State<AppState>,
-) -> AppResult<Json<Option<Post>>> {
+) -> JsonResult<Option<Post>> {
     let result = state.post_service.get_post(post_id).await?;
 
     Ok(Json(result))
