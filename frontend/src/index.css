@@ -1,2 +1,7 @@
 @import "tailwindcss";
 
+@layer components {
+    .posts-modal-content {
+        @apply w-2/3 max-w-xl absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 outline-0;
+    }
+}
