@@ -2,6 +2,7 @@ import {Outlet, useLoaderData} from "react-router"
 import NavigationBar from "../components/NavigationBar.tsx";
 import {useCallback, useEffect, useState} from "react";
 import {AuthContext, type AuthContextMethods, authProvider, type AuthUser} from "../auth.ts";
+import {Toaster} from "react-hot-toast";
 
 export async function loader() {
     const user = await authProvider.checkAuth();
@@ -60,6 +61,7 @@ function MainLayout() {
             <main className="grow flex bg-gray-50">
                 <Outlet/>
             </main>
+            <Toaster/>
         </AuthContext.Provider>
     )
 }
