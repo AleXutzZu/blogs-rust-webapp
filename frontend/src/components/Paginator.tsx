@@ -6,10 +6,10 @@ const POSTS_PER_PAGE = 7;
 
 interface PaginatorProps {
     totalPosts: number,
-    initialPosts: Post[],
     username: string,
     updateCallback: (posts: Post[]) => void;
 }
+
 function PaginatorPageButton({page, active, updatePage}: {
     page: number,
     active: boolean,
@@ -50,11 +50,7 @@ export function PostsPaginatorBar(props: PaginatorProps) {
     const currentPage = Math.min(Number(searchParams.get("page") || 1), totalPages);
 
     useEffect(() => {
-        if (currentPage === 1) {
-            props.updateCallback(props.initialPosts);
-        } else {
-            fetcher.load(`/users/${props.username}?page=${currentPage}`);
-        }
+        fetcher.load(`/users/${props.username}?page=${currentPage}`);
     }, [currentPage]);
 
     useEffect(() => {
@@ -85,18 +81,21 @@ export function PostsPaginatorBar(props: PaginatorProps) {
     //Preparing buttons
     if (totalPages <= 9) {
         for (let i = 1; i <= totalPages; ++i) {
-            pageButtons.push(<PaginatorPageButton page={i} active={i == currentPage} updatePage={handleButtonClick} key={i}/>);
+            pageButtons.push(<PaginatorPageButton page={i} active={i == currentPage} updatePage={handleButtonClick}
+                                                  key={i}/>);
         }
     } else {
         //Put first 3 and last 3
         let foundPage = false;
         for (let i = 1; i <= 3; ++i) {
-            pageButtons.push(<PaginatorPageButton page={i} active={i == currentPage} updatePage={handleButtonClick} key={i}/>);
+            pageButtons.push(<PaginatorPageButton page={i} active={i == currentPage} updatePage={handleButtonClick}
+                                                  key={i}/>);
             if (i == currentPage) foundPage = true;
         }
 
         for (let i = totalPages - 2; i <= totalPages; ++i) {
-            pageButtons.push(<PaginatorPageButton page={i} active={i == currentPage} updatePage={handleButtonClick} key={i}/>);
+            pageButtons.push(<PaginatorPageButton page={i} active={i == currentPage} updatePage={handleButtonClick}
+                                                  key={i}/>);
             if (i == currentPage) foundPage = true;
         }
         //Means we can put a single ...
@@ -104,7 +103,8 @@ export function PostsPaginatorBar(props: PaginatorProps) {
             pageButtons.splice(3, 0, <PaginatorSpan key={totalPages + 1}/>);
         } else {
             //This page must be inserted between the first and last 3
-            pageButtons.splice(3, 0, <PaginatorPageButton page={currentPage} active updatePage={handleButtonClick} key={totalPages + 2}/>);
+            pageButtons.splice(3, 0, <PaginatorPageButton page={currentPage} active updatePage={handleButtonClick}
+                                                          key={totalPages + 2}/>);
 
             //Now we need to check how many we have on the left and right so we have an idea if we need to insert a span
             if (currentPage - 3 > 2) pageButtons.splice(3, 0, <PaginatorSpan key={totalPages + 3}/>);

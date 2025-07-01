@@ -1,6 +1,6 @@
 import {type ActionFunctionArgs, type LoaderFunctionArgs, useActionData, useLoaderData, useSubmit} from "react-router";
 import type {Post} from "../components/PostCard.tsx";
-import {type HTMLInputTypeAttribute, useCallback, useEffect, useState} from "react";
+import {type HTMLInputTypeAttribute, useCallback, useEffect, useRef, useState} from "react";
 import {PostsPaginatorBar} from "../components/Paginator.tsx";
 import {useAuthContext} from "../auth.ts";
 import ReactModal from "react-modal";
@@ -86,7 +86,7 @@ export default function UserPage() {
             </div>
             <hr className="my-4"/>
             <div className="flex flex-col space-y-6 items-center w-full">
-                <PostsPaginatorBar totalPosts={data.user.totalPosts} initialPosts={data.user.posts}
+                <PostsPaginatorBar totalPosts={data.user.totalPosts}
                                    username={data.user.username} updateCallback={updatePosts}/>
                 {user && user.username == data.user.username && <CreatePostDialogOpener/>}
                 {posts.map(post => <UserProfilePost {...post} key={post.id}/>)}
@@ -97,12 +97,22 @@ export default function UserPage() {
 function UserProfilePost(props: Post) {
     const [expanded, setExpanded] = useState(false);
     const [imageError, setImageError] = useState(false);
+    const [isClipped, setClipped] = useState(false);
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const element = contentRef.current;
+        if (element) {
+            const clipped = element.scrollHeight > element.clientHeight;
+            setClipped(clipped);
+        }
+    }, [props.body, imageError]);
 
     return (
         <div className="relative w-full mx-auto my-6 p-4 rounded-2xl shadow-lg bg-white min-w-xs">
             <h2 className="text-2xl font-semibold">{props.title}</h2>
             <p className="text-sm mb-2">{format(props.date, "MMM do yyyy p")}</p>
-            <div
+            <div ref={contentRef}
                 className={`transition-all duration-500 ${
                     expanded ? "h-auto" : "max-h-60 overflow-hidden"
                 }`}
@@ -118,7 +128,7 @@ function UserProfilePost(props: Post) {
                 />}
             </div>
 
-            {!expanded && (
+            {!expanded && isClipped && (
                 <div className="text-center mt-2">
                     <button
                         onClick={() => setExpanded(true)}
