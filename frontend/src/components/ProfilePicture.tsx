@@ -9,7 +9,7 @@ export function ViewerProfilePicture(props: { username: string }) {
 
     return (
         <div
-            className="size-48 rounded-full border-2 p-2">
+            className="size-48 rounded-full border-2 border-gray-700">
             {!stockPhoto &&
                 <img src={`/api/users/${props.username}/avatar`} alt="User Profile"
                      onError={() => setStockPhoto(true)}
@@ -54,7 +54,7 @@ export function EditableProfilePicture() {
 
     return (
         <Form method="post" encType="multipart/form-data"
-              className="size-48 rounded-full border-2 p-2 hover:cursor-pointer relative group"
+              className="size-48 rounded-full border-2 border-gray-700 hover:cursor-pointer relative group"
               onClick={handleClick}>
 
             {!stockPhoto &&
