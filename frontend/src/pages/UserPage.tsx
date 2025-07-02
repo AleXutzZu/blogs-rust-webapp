@@ -85,7 +85,7 @@ export default function UserPage() {
                 {user && user.username == data.user.username && <EditableProfilePicture/>}
                 {!user || user.username !== data.user.username && <ViewerProfilePicture username={data.user.username}/>}
                 <div className="flex flex-col items-center md:items-start">
-                    <p className="block font-bold text-3xl">{data.user.username}</p>
+                    <p className="block font-bold text-5xl">{data.user.username}</p>
                     <p className="italic text-gray-400 text-lg">est. {format(data.user.joined, "MMM do yyyy")}</p>
                 </div>
             </div>
