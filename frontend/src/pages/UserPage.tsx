@@ -10,6 +10,7 @@ import {CreatePostDialog} from "../components/CreatePostDialog.tsx";
 
 interface UserDTO {
     username: string,
+    joined: Date,
     posts: Post[],
     totalPosts: number,
 }
@@ -83,7 +84,10 @@ export default function UserPage() {
             <div className="flex items-center flex-col md:flex-row gap-4">
                 {user && user.username == data.user.username && <EditableProfilePicture/>}
                 {!user || user.username !== data.user.username && <ViewerProfilePicture username={data.user.username}/>}
-                <p className="block font-bold text-3xl">{data.user.username}</p>
+                <div className="flex flex-col items-center md:items-start">
+                    <p className="block font-bold text-3xl">{data.user.username}</p>
+                    <p className="italic text-gray-400 text-lg">est. {format(data.user.joined, "MMM do yyyy")}</p>
+                </div>
             </div>
             <hr className="my-4"/>
             <div className="flex flex-col space-y-6 items-center w-full">
