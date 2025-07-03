@@ -9,6 +9,8 @@ use axum::Json;
 use axum_extra::extract::cookie::{Cookie, SameSite};
 use axum_extra::extract::{CookieJar, Multipart};
 use serde::Deserialize;
+use crate::model::post::PaginatedPostSearch;
+
 #[derive(Deserialize)]
 pub struct AuthForm {
     username: String,
@@ -87,11 +89,6 @@ pub async fn signup_user(
         .create_user(form.username, form.password)
         .await?;
     Ok(StatusCode::NO_CONTENT)
-}
-
-#[derive(Deserialize)]
-pub struct PaginatedPostSearch {
-    pub page: Option<i32>,
 }
 
 pub async fn get_user_with_posts(
