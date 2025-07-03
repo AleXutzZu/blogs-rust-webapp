@@ -92,11 +92,13 @@ export default function UserPage() {
 
     const user = authMethods.getLoggedUser();
 
+    const isCurrentUser = user?.username === data.user.username;
+
     return (
         <div className="mx-auto w-full md:w-2/3 mt-24 px-4 md:px-0 max-w-4xl">
             <div className="flex items-center flex-col md:flex-row gap-4">
-                {user && user.username == data.user.username && <EditableProfilePicture/>}
-                {(!user || (user.username !== data.user.username)) &&
+                {isCurrentUser && <EditableProfilePicture/>}
+                {!isCurrentUser &&
                     <ViewerProfilePicture username={data.user.username}/>}
                 <div className="flex flex-col items-center md:items-start">
                     <p className="block font-bold text-5xl">{data.user.username}</p>
@@ -108,7 +110,7 @@ export default function UserPage() {
                 <PostsPaginatorBar totalPosts={data.user.totalPosts}
                                    username={data.user.username} updateCallback={updatePosts}
                                    updateLoading={updateLoading}/>
-                {user && user.username == data.user.username && <CreatePostDialog/>}
+                {isCurrentUser && <CreatePostDialog/>}
                 {!isLoading && posts.map(post => <UserProfilePost post={post} key={post.id}
                                                                   username={data.user.username}/>)}
                 {isLoading && <PostLoadingSkeleton/>}
