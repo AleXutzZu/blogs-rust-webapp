@@ -1,15 +1,17 @@
 use crate::error::AppError::{InternalError, NotFoundError};
 use crate::error::{AppResult, JsonResult};
-use crate::model::post::Post;
+use crate::model::post::{PaginatedPostSearch, Post};
 use crate::AppState;
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::IntoResponse;
 use axum::Json;
 use axum_extra::extract::{CookieJar, Multipart};
 
-pub async fn get_posts(State(state): State<AppState>) -> JsonResult<Vec<Post>> {
-    let result = state.post_service.get_all_posts().await?;
+pub async fn get_posts_on_page(State(state): State<AppState>, Query(params): Query<PaginatedPostSearch>) -> JsonResult<Vec<Post>> {
+    let page = params.page.unwrap_or(1) as u32;
+
+    let result = state.post_service.get_posts_on_page(page).await?;
 
     Ok(Json(result))
 }

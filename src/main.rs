@@ -66,7 +66,7 @@ async fn main() {
         // .not_found_service(tower_http::services::ServeFile::new("frontend/dist/index.html"))
         .route(
             "/api/posts",
-            axum::routing::get(controller::post::get_posts),
+            axum::routing::get(controller::post::get_posts_on_page),
         )
         .route(
             "/api/posts/{postId}",

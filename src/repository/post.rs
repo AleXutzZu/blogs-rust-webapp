@@ -17,15 +17,20 @@ impl PostRepository {
         Self { connection_pool }
     }
 
-    pub async fn fetch_all_posts(&self) -> AppResult<Vec<Post>> {
+    pub async fn fetch_posts_on_page(&self, page: u32) -> AppResult<Vec<Post>> {
+        let posts_per_page: i64 = 10;
+
         use crate::schema::posts::dsl::*;
         let conn = self.connection_pool.get().await?;
-
         let result = conn
-            .interact(|conn| {
+            .interact(move |conn| {
+                let offset_count: i64 = (page - 1) as i64 * posts_per_page;
+
                 posts::table()
                     .select(Post::as_select())
                     .order_by(date.desc())
+                    .offset(offset_count)
+                    .limit(posts_per_page)
                     .load(conn)
             })
             .await??;

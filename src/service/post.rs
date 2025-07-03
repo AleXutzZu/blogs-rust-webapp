@@ -11,12 +11,10 @@ impl PostService {
     pub fn new(post_repository: PostRepository) -> Self {
         Self { post_repository }
     }
-
-    pub async fn get_all_posts(&self) -> AppResult<Vec<Post>> {
-        let result = self.post_repository.fetch_all_posts().await?;
-        Ok(result)
+    pub async fn get_posts_on_page(&self, page: u32) -> AppResult<Vec<Post>> {
+        self.post_repository.fetch_posts_on_page(page).await
     }
-
+    
     pub async fn get_post(&self, id: i32) -> AppResult<Option<Post>> {
         let result = self.post_repository.fetch_post(id).await?;
         Ok(result)
