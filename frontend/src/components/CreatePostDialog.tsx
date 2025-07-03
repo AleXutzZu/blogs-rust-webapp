@@ -14,6 +14,9 @@ type PostForm = {
     image?: FileList
 }
 
+//TODO: Switch to fetcher instead of submitter
+// Add some loading logic based on fetcher.state === "submitting"
+
 export function CreatePostDialog() {
     const [openModal, setOpenModal] = useState(false);
     const handleClick = () => setOpenModal(true);
@@ -22,8 +25,8 @@ export function CreatePostDialog() {
     const actionData = useActionData() as UserActionResult | undefined;
 
     const validationSchema = Yup.object({
-        title: Yup.string().required("Title is required"),
-        body: Yup.string().required("Body is required"),
+        title: Yup.string().required("A title is required"),
+        body: Yup.string().required("A body is required"),
         image: Yup.mixed<FileList>().optional()
             .test("fileSize", "Image is too large", value => {
                 if (!value?.[0]) return true;
@@ -56,17 +59,22 @@ export function CreatePostDialog() {
     };
 
     useEffect(() => {
-        if (actionData?.success && actionData?.type == "post") {
-            setOpenModal(false);
+        if (actionData?.type !== "post") return;
+
+        setOpenModal(false);
+        methods.reset();
+        if (actionData.success) {
             toast.success("Post published", {removeDelay: 5000, position: "top-right"});
-            methods.reset();
+        } else {
+            toast.error("An error occurred", {removeDelay: 5000, position: "top-right"});
         }
     }, [actionData]);
 
     return (
         <>
-            <div className="w-full px-16 py-4 rounded-2xl shadow-lg flex items-center space-x-0.5 cursor-pointer bg-white"
-                 onClick={handleClick}>
+            <div
+                className="w-full px-16 py-4 rounded-2xl shadow-lg flex items-center space-x-0.5 cursor-pointer bg-white"
+                onClick={handleClick}>
                 <p className="font-semibold text-gray-600 italic">Start a new post...</p>
             </div>
             <ReactModal isOpen={openModal} shouldCloseOnEsc={true} onRequestClose={() => setOpenModal(false)}
@@ -120,13 +128,18 @@ function PostInput(props: {
     accept?: string,
     label: string
 }) {
-    const {register} = useFormContext<PostForm>();
+    const {register, formState: {errors}} = useFormContext<PostForm>();
 
     return (
         <>
-            <label htmlFor={props.name} className="block text-sm font-medium text-gray-700">
-                {props.label}
-            </label>
+            {errors[props.name]?.message &&
+                <label htmlFor={props.name}
+                       className="block text-sm font-medium text-red-400">{errors[props.name]?.message}
+                </label>}
+            {!errors[props.name]?.message &&
+                <label htmlFor={props.name} className="block text-sm font-medium text-gray-700">
+                    {props.label}
+                </label>}
             <input
                 {...register(props.name)} type={props.type}
                 className={props.className}
@@ -137,18 +150,23 @@ function PostInput(props: {
 }
 
 function PostTextArea(props: { name: keyof PostForm, label: string }) {
-    const {register} = useFormContext<PostForm>();
+    const {register, formState: {errors}} = useFormContext<PostForm>();
 
     return (
         <>
-            <label htmlFor={props.name} className="block text-sm font-medium text-gray-700">
-                {props.label}
-            </label>
-            <textarea
-                {...register(props.name)}
-                rows={5}
-                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 h-64"
-            />
+            {errors[props.name]?.message &&
+                <label htmlFor={props.name}
+                       className="block text-sm font-medium text-red-400">{errors[props.name]?.message}
+                </label>}
+            {!errors[props.name]?.message &&
+                <label htmlFor={props.name} className="block text-sm font-medium text-gray-700">
+                    {props.label}
+                </label>}
+                <textarea
+                    {...register(props.name)}
+                    rows={5}
+                    className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 h-64"
+                />
         </>
     );
 }
