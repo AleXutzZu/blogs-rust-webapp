@@ -47,12 +47,11 @@ export function PostsPaginatorBar(props: PaginatorProps) {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const fetcher = useFetcher();
-
-    const currentPage = Math.min(Number(searchParams.get("page") || 1), totalPages);
+    const currentPage = Number(searchParams.get("page") || 1)
 
     useEffect(() => {
         fetcher.load(`/users/${props.username}?page=${currentPage}`);
-    }, [currentPage]);
+    }, [currentPage, props.username]);
 
     useEffect(() => {
         if (fetcher.data) props.updateCallback(fetcher.data.user.posts);
