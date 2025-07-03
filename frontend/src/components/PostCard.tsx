@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {Link} from "react-router";
 import {format} from "date-fns";
 
@@ -13,18 +13,29 @@ export interface Post {
 export default function PostCard(props: Post) {
     const [expanded, setExpanded] = useState(false);
     const [imageError, setImageError] = useState(false);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [isClipped, setClipped] = useState(false);
+
+    useEffect(() => {
+        const element = contentRef.current;
+        if (element) {
+            const clipped = element.scrollHeight > element.clientHeight;
+            setClipped(clipped);
+        }
+    }, [props.body, imageError]);
 
     return (
-        <div className="relative w-2/3 md:max-w-2xl mx-auto my-6 p-4 rounded-2xl shadow-lg bg-white min-w-xs">
-            <h2 className="text-2xl font-semibold">{props.title}</h2>
+        <div className="relative w-full max-w-2xl mx-auto my-6 p-4 rounded-2xl shadow-lg bg-white">
+            <h2 className="text-2xl font-semibold truncate">{props.title}</h2>
             <p className="text-sm mb-2">by <Link to={`/users/${props.username}`}
-                                                 className="italic text-sm">{props.username}</Link> - {format(props.date, "MMM do yyyy p")}</p>
-            <div
-                className={`transition-all duration-500 ${
-                    expanded ? "blur-0 h-auto" : "blur-[2px] max-h-60 overflow-hidden"
-                }`}
+                                                 className="italic text-sm">{props.username}</Link> - {format(props.date, "MMM do yyyy p")}
+            </p>
+            <div ref={contentRef}
+                 className={`transition-all duration-500 ${
+                     expanded ? "h-auto" : "max-h-60 overflow-hidden"
+                 }`}
             >
-                <p className="text-base mb-4">
+                <p className="text-base mb-4 whitespace-pre-line break-words">
                     {props.body}
                 </p>
                 {!imageError && <img
@@ -35,7 +46,7 @@ export default function PostCard(props: Post) {
                 />}
             </div>
 
-            {!expanded && (
+            {!expanded && isClipped && (
                 <div className="text-center mt-2">
                     <button
                         onClick={() => setExpanded(true)}

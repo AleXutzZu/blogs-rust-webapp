@@ -9,7 +9,7 @@ export default function PostsPage() {
     let posts = useLoaderData<Post[]>();
 
     return (
-        <div className="flex flex-col items-center mx-auto mt-12 w-5/6 md:w-2/3">
+        <div className="flex flex-col items-center mx-auto mt-12 w-full px-2 md:px-0">
             {posts.map(post => <PostCard {...post} key={post.id}/>)}
         </div>
     )
