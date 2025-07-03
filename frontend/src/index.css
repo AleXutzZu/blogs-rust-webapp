@@ -4,4 +4,8 @@
     .posts-modal-content {
         @apply w-full px-4 md:px-0 md:w-2/3 max-w-2xl absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 outline-0;
     }
+
+    .posts-delete-modal-content {
+        @apply w-full max-w-96 px-4 md:px-0 absolute left-1/2 top-1/4 -translate-y-1/2 -translate-x-1/2 outline-0;
+    }
 }
