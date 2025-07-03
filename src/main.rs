@@ -80,7 +80,7 @@ async fn main() {
             "/api/posts/create",
             axum::routing::post(controller::post::create_post),
         )
-        // .route("/api/posts/{postId}", TODO: add deleter)
+        .route("/api/posts/{postId}", axum::routing::delete(controller::post::delete_user_post))
         .route(
             "/api/users/{username}",
             axum::routing::get(controller::user::get_user_with_posts),

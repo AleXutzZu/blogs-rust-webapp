@@ -3,7 +3,7 @@ use crate::error::{AppResult, JsonResult};
 use crate::model::post::Post;
 use crate::AppState;
 use axum::extract::{Path, State};
-use axum::http::HeaderMap;
+use axum::http::{HeaderMap, StatusCode};
 use axum::response::IntoResponse;
 use axum::Json;
 use axum_extra::extract::{CookieJar, Multipart};
@@ -63,7 +63,6 @@ pub async fn create_post(
     let mut body: String = "".to_string();
     let mut image: Option<Vec<u8>> = None;
 
-    
     while let Some(field) = form_data.next_field().await? {
         let name = field
             .name()
@@ -93,10 +92,30 @@ pub async fn create_post(
             _ => {}
         }
     }
-    
+
     state
         .post_service
         .create_post(title, body, image, user.username)
         .await?;
     Ok(())
+}
+pub async fn delete_user_post(
+    State(state): State<AppState>,
+    Path(post_id): Path<i32>,
+    jar: CookieJar,
+) -> AppResult<StatusCode> {
+    let cookie = jar
+        .get("session_id")
+        .ok_or(InternalError("Could not delete post".to_string()))?;
+
+    let session_id = cookie.value().to_string();
+
+    let user = state
+        .user_service
+        .get_user_by_session(session_id)
+        .await?
+        .ok_or(InternalError("Could not delete post".to_string()))?;
+    
+    state.post_service.delete_post_of_user(user.username, post_id).await?;
+    Ok(StatusCode::NO_CONTENT)
 }

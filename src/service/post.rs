@@ -56,4 +56,8 @@ impl PostService {
     pub async fn get_post_count_by_username(&self, username: String) -> AppResult<i64> {
         self.post_repository.get_post_count_by_username(username).await
     }
+    
+    pub async fn delete_post_of_user(&self, username: String, post_id: i32) -> AppResult<()> {
+        self.post_repository.delete_post_belonging_to_username(post_id, username).await
+    }
 }

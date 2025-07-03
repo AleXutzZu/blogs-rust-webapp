@@ -62,29 +62,29 @@ impl PostRepository {
         Ok(())
     }
 
-    pub async fn get_post_count_by_username(&self,  username: String) -> AppResult<i64> {
+    pub async fn get_post_count_by_username(&self, username: String) -> AppResult<i64> {
         use crate::schema::posts::dsl::posts;
         let conn = self.connection_pool.get().await?;
-        let result = conn.interact(move |conn| {
-            posts.filter(crate::schema::posts::dsl::username.eq(username)).count().get_result(conn)
-        }).await??;
-        
+        let result = conn
+            .interact(move |conn| {
+                posts
+                    .filter(crate::schema::posts::dsl::username.eq(username))
+                    .count()
+                    .get_result(conn)
+            })
+            .await??;
+
         Ok(result)
     }
-    
-    pub async fn get_posts_by_username(
-        &self,
-        user: &User,
-        page: i32,
-    ) -> AppResult<Vec<Post>> {
+
+    pub async fn get_posts_by_username(&self, user: &User, page: i32) -> AppResult<Vec<Post>> {
         let posts_per_page: i64 = 7;
-        
+
         let conn = self.connection_pool.get().await?;
         let username = user.username.clone();
         let result = conn
             .interact(move |conn| {
                 let offset_count: i64 = (page - 1) as i64 * posts_per_page;
-                
 
                 let user = User {
                     username,
@@ -100,5 +100,24 @@ impl PostRepository {
             .await??;
 
         Ok(result)
+    }
+
+    pub async fn delete_post_belonging_to_username(
+        &self,
+        post_id: i32,
+        user: String,
+    ) -> AppResult<()> {
+        use crate::schema::posts::dsl::*;
+        let conn = self.connection_pool.get().await?;
+
+        conn.interact(move |conn| {
+            diesel::delete(posts::table())
+                .filter(id.eq(post_id))
+                .filter(username.eq(user))
+                .execute(conn)
+        })
+        .await??;
+
+        Ok(())
     }
 }
