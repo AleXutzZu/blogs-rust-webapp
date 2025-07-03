@@ -11,15 +11,17 @@ export async function loader() {
 
 function MainLayout() {
     const data = useLoaderData<typeof loader>();
+    const [profilePicture, setProfilePicture] = useState<string | null>(null);
+    const [stockPhoto, setStockPhoto] = useState(false);
 
     useEffect(() => {
         const date = Date.now();
         if (!data.user) setProfilePicture(null);
-        else setProfilePicture(`/api/users/${data.user?.username}/avatar?v=${date}`);
+        else {
+            setStockPhoto(false);
+            setProfilePicture(`/api/users/${data.user?.username}/avatar?v=${date}`);
+        }
     }, [data]);
-
-    const [profilePicture, setProfilePicture] = useState<string | null>(null);
-    const [stockPhoto, setStockPhoto] = useState(false);
 
     const getLoggedUser = useCallback(() => {
         return data.user as AuthUser | null;
