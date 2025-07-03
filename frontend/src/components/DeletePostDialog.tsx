@@ -1,35 +1,42 @@
 import {useEffect, useState} from "react";
-import {useActionData, useSubmit} from "react-router";
+import {useFetcher} from "react-router";
 import toast from "react-hot-toast";
 import type {UserActionResult} from "../pages/UserPage.tsx";
 import ReactModal from "react-modal";
 import {FormProvider, useForm} from "react-hook-form";
 
 
-export default function DeletePostDialog() {
+export default function DeletePostDialog({id}: { id: number }) {
     const [openModal, setOpenModal] = useState(false);
     const handleClick = () => setOpenModal(true);
 
-    const actionData = useActionData() as UserActionResult | undefined;
-    const submit = useSubmit();
+    const fetcher = useFetcher();
     useEffect(() => {
-        if (actionData?.success && actionData?.type === "delete-post") {
-            setOpenModal(false);
+        const actionData = fetcher.data as UserActionResult | undefined;
+        if (!actionData) return;
+        if (actionData.type !== "delete-post") return;
+        setOpenModal(false);
+
+        if (actionData.success) {
             toast.success("Post successfully deleted", {
                 removeDelay: 5000,
                 position: "top-right",
-                id: "1",
             });
+        } else {
+            toast.error("An error occurred, please try again", {
+                removeDelay: 5000,
+                position: "top-right",
+            })
         }
-    }, [actionData]);
+    }, [fetcher.data]);
 
     const methods = useForm();
 
     const onSubmit = async () => {
         const formData = new FormData();
         formData.append("type", "delete-post");
-
-        await submit(formData, {
+        formData.append("id", id.toString());
+        await fetcher.submit(formData, {
             method: "delete",
             encType: "multipart/form-data",
         });
@@ -50,7 +57,8 @@ export default function DeletePostDialog() {
             <ReactModal isOpen={openModal} onRequestClose={() => setOpenModal(false)}
                         className="posts-delete-modal-content">
                 <FormProvider {...methods}>
-                    <form className="size-full bg-white shadow-md p-6 rounded-xl flex flex-col" onSubmit={methods.handleSubmit(onSubmit)}>
+                    <form className="size-full bg-white shadow-md p-6 rounded-xl flex flex-col"
+                          onSubmit={methods.handleSubmit(onSubmit)}>
                         <h1 className="font-bold text-2xl">Delete post? </h1>
                         <p className="font-medium text-red-400 text-md">This action cannot be undone.</p>
                         <div className="flex gap-4 justify-end mt-6">
