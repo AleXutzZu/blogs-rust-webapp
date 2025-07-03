@@ -5,7 +5,7 @@ import {FormProvider, useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {useEffect} from "react";
 import {authProvider} from "../auth.ts";
-//TODO Add loading spinner when creating account
+
 export async function action({request}: ActionFunctionArgs) {
     const formData = await request.formData();
     const username = formData.get("username") as string;
