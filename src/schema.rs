@@ -3,10 +3,35 @@
 diesel::table! {
     posts (id) {
         id -> Integer,
+        title -> Text,
         body -> Text,
-        date -> Date,
+        date -> Timestamp,
         image -> Nullable<Binary>,
         username -> Text,
-        avatar -> Nullable<Binary>,
     }
 }
+
+diesel::table! {
+    sessions (session_id) {
+        session_id -> Text,
+        username -> Text,
+    }
+}
+
+diesel::table! {
+    users (username) {
+        username -> Text,
+        password -> Text,
+        avatar -> Nullable<Binary>,
+        joined -> Date,
+    }
+}
+
+diesel::joinable!(posts -> users (username));
+diesel::joinable!(sessions -> users (username));
+
+diesel::allow_tables_to_appear_in_same_query!(
+    posts,
+    sessions,
+    users,
+);
