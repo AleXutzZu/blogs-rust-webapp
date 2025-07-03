@@ -1,6 +1,6 @@
 import {type HTMLInputTypeAttribute, useEffect, useState} from "react";
 import {FormProvider, useForm, useFormContext} from "react-hook-form";
-import {useActionData, useSubmit} from "react-router";
+import {useActionData, useNavigation, useSubmit} from "react-router";
 import type {ObjectSchema} from "yup";
 import * as Yup from "yup";
 import {yupResolver} from "@hookform/resolvers/yup";
@@ -14,14 +14,12 @@ type PostForm = {
     image?: FileList
 }
 
-//TODO: Switch to fetcher instead of submitter
-// Add some loading logic based on fetcher.state === "submitting"
-
 export function CreatePostDialog() {
     const [openModal, setOpenModal] = useState(false);
     const handleClick = () => setOpenModal(true);
     const submit = useSubmit();
 
+    const navigation = useNavigation();
     const actionData = useActionData() as UserActionResult | undefined;
 
     const validationSchema = Yup.object({
@@ -70,6 +68,8 @@ export function CreatePostDialog() {
         }
     }, [actionData]);
 
+    const disableSubmitting = navigation.state === "submitting";
+
     return (
         <>
             <div
@@ -106,11 +106,11 @@ export function CreatePostDialog() {
                         </div>
 
                         <div className="text-right">
-                            <button
-                                type="submit"
-                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                            <button disabled={disableSubmitting}
+                                    type="submit"
+                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:not-disabled:bg-blue-700 transition disabled:bg-blue-400"
                             >
-                                Publish
+                                {disableSubmitting ? "Publishing..." : "Publish"}
                             </button>
                         </div>
                     </form>
