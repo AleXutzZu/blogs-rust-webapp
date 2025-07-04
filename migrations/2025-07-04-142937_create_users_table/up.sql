@@ -5,6 +5,6 @@ CREATE TABLE users
 (
     username VARCHAR PRIMARY KEY NOT NULL,
     password VARCHAR             NOT NULL,
-    avatar   BLOB,
+    avatar   BYTEA,
     joined     DATE            NOT NULL
 );

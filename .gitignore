@@ -2,3 +2,4 @@
 .env
 blog_database
 .idea
+database.env

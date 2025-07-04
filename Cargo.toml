@@ -7,12 +7,12 @@ edition = "2021"
 axum = { version = "0.8.4", features = ["macros"] }
 axum-extra = { version = "0.10.1", features = ["cookie", "multipart"] }
 tower-http = { version = "0.6.4", features = ["fs", "cors"] }
-diesel = { version = "2.2.4", features = ["chrono", "sqlite"] }
+diesel = { version = "2.2.4", features = ["chrono", "postgres"] }
 dotenv = "0.15.0"
 tokio = { version = "1.40.0", features = ["rt-multi-thread"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 serde = { version = "1.0.210", features = ["derive"] }
-deadpool-diesel = { version = "0.6.1", features = ["sqlite"] }
+deadpool-diesel = { version = "0.6.1", features = ["postgres"] }
 diesel_migrations = "2.2.0"
 thiserror = "2.0.12"
 uuid = { version = "1.17.0", features = ["v4"] }

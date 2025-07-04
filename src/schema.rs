@@ -2,27 +2,27 @@
 
 diesel::table! {
     posts (id) {
-        id -> Integer,
+        id -> Int4,
         title -> Text,
         body -> Text,
         date -> Timestamp,
-        image -> Nullable<Binary>,
-        username -> Text,
+        image -> Nullable<Bytea>,
+        username -> Varchar,
     }
 }
 
 diesel::table! {
     sessions (session_id) {
-        session_id -> Text,
-        username -> Text,
+        session_id -> Varchar,
+        username -> Varchar,
     }
 }
 
 diesel::table! {
     users (username) {
-        username -> Text,
-        password -> Text,
-        avatar -> Nullable<Binary>,
+        username -> Varchar,
+        password -> Varchar,
+        avatar -> Nullable<Bytea>,
         joined -> Date,
     }
 }

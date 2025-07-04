@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Selectable, Serialize, Associations, Identifiable)]
 #[diesel(table_name = crate::schema::posts)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 #[diesel(belongs_to(User, foreign_key=username))]
 pub struct Post {
     pub id: i32,
@@ -19,7 +19,7 @@ pub struct Post {
 
 #[derive(Insertable)]
 #[diesel(table_name = crate::schema::posts)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct NewPost {
     pub title: String,
     pub body: String,

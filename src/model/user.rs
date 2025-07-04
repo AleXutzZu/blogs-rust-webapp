@@ -5,7 +5,7 @@ use crate::model::post::Post;
 
 #[derive(Serialize, Deserialize, Queryable, Selectable, Insertable, Identifiable, Default)]
 #[diesel(table_name = crate::schema::users)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 #[diesel(primary_key(username))]
 pub struct User {
     pub username: String,
@@ -27,7 +27,7 @@ pub struct UserDTO {
 
 #[derive(AsChangeset, Serialize)]
 #[diesel(table_name = crate::schema::users)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 #[diesel(primary_key(username))]
 pub struct UpdateUser {
     pub username: Option<String>,

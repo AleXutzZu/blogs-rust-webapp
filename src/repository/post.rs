@@ -1,7 +1,7 @@
 use crate::error::AppResult;
 use crate::model::post::{NewPost, Post};
 use crate::model::user::User;
-use deadpool_diesel::sqlite::{Manager, Object};
+use deadpool_diesel::postgres::{Manager, Object};
 use deadpool_diesel::Pool;
 use diesel::associations::HasTable;
 use diesel::{

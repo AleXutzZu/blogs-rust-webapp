@@ -1,5 +1,5 @@
 use blog_posts::database;
-use deadpool_diesel::sqlite::Pool;
+use deadpool_diesel::postgres::Pool;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use std::sync::Arc;
 use tower_http::cors::CorsLayer;

@@ -1,6 +1,6 @@
 use crate::error::AppResult;
 use crate::model::user::{UpdateUser, User};
-use deadpool_diesel::sqlite::{Manager, Object};
+use deadpool_diesel::postgres::{Manager, Object};
 use deadpool_diesel::Pool;
 use diesel::QueryDsl;
 use diesel::OptionalExtension;
