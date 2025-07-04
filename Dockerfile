@@ -33,10 +33,6 @@ COPY --from=react-builder /app/dist ./frontend/dist
 
 # Copy your compiled server
 COPY --from=rust-builder /usr/src/app/target/release/blog_posts ./blog_posts
-
-RUN mkdir -p /app/database
-
-ENV DATABASE_URL=/app/database/db.sqlite
 EXPOSE 3000
 
 CMD ["./blog_posts"]
