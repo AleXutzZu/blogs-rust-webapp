@@ -1,0 +1,27 @@
+services:
+  webserver:
+    container_name: "rusty_posts-webserver"
+    image: "rusty_posts-image"
+    pull_policy: never
+    build:
+      target: runner
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.production
+    depends_on:
+      - database
+  database:
+    image: postgres:13.4
+    container_name: "rusty_posts-database"
+    env_file:
+      - database.env
+    volumes:
+      - rusty_posts-volume:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  rusty_posts-volume:

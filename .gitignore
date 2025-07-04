@@ -3,3 +3,4 @@
 blog_database
 .idea
 database.env
+.env.production

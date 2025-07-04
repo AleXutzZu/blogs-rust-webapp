@@ -11,7 +11,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # 2) Compile the Rust backend
-FROM rust:1.78 AS rust-builder
+FROM rust:1.88 AS rust-builder
 WORKDIR /usr/src/app
 
 COPY Cargo.toml Cargo.lock ./
@@ -25,7 +25,7 @@ WORKDIR /app
 
 # Install runtime deps
 RUN apt-get update \
- && apt-get install -y --no-install-recommends libsqlite3-0 \
+ && apt-get install -y --no-install-recommends libpq5 \
  && rm -rf /var/lib/apt/lists/*
 
 # Copy ONLY the React build output
