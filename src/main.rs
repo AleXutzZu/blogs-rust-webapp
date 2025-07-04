@@ -61,56 +61,71 @@ async fn main() {
         ]);
 
     let state = AppState::new(pool);
-    let app = axum::Router::new()
-        .fallback_service(tower_http::services::ServeDir::new("frontend/dist"))
-        // .not_found_service(tower_http::services::ServeFile::new("frontend/dist/index.html"))
+    let api_routes = axum::Router::new()
         .route(
-            "/api/posts",
+            "/posts",
             axum::routing::get(controller::post::get_posts_on_page),
         )
         .route(
-            "/api/posts/{postId}",
+            "/posts/{postId}",
             axum::routing::get(controller::post::get_post),
         )
         .route(
-            "/api/posts/{postId}/image",
+            "/posts/{postId}/image",
             axum::routing::get(controller::post::get_post_image),
         )
         .route(
-            "/api/posts/create",
+            "/posts/create",
             axum::routing::post(controller::post::create_post),
         )
-        .route("/api/posts/{postId}", axum::routing::delete(controller::post::delete_user_post))
         .route(
-            "/api/users/{username}",
+            "/posts/{postId}",
+            axum::routing::delete(controller::post::delete_user_post),
+        )
+        .route(
+            "/users/{username}",
             axum::routing::get(controller::user::get_user_with_posts),
         )
         .route(
-            "/api/users/{username}",
+            "/users/{username}",
             axum::routing::post(controller::user::update_user),
         )
         .route(
-            "/api/users/{username}/avatar",
+            "/users/{username}/avatar",
             axum::routing::get(controller::user::get_user_avatar),
         )
         .route(
-            "/api/auth/login",
+            "/auth/login",
             axum::routing::post(controller::user::login_user),
         )
         .route(
-            "/api/auth/logout",
+            "/auth/logout",
             axum::routing::post(controller::user::logout_user),
         )
         .route(
-            "/api/auth/signup",
+            "/auth/signup",
             axum::routing::post(controller::user::signup_user),
         )
         .route(
-            "/api/auth/me",
+            "/auth/me",
             axum::routing::get(controller::user::validate_session),
-        )
-        .layer(cors)
-        .with_state(state);
+        );
+
+    let assets = tower_http::services::ServeDir::new("frontend/dist/assets");
+
+    let index = tower_http::services::ServeFile::new("frontend/dist/index.html");
+    let favicon = axum::routing::get_service(tower_http::services::ServeFile::new(
+        "frontend/dist/favicon.ico",
+    ));
+    let spa_dir = tower_http::services::ServeDir::new("frontend/dist").fallback(index);
+    
+    let app = axum::Router::new()
+        .nest("/api", api_routes)
+        .nest_service("/assets", assets)
+        .route("/favicon.ico", favicon)
+        .fallback(axum::routing::get_service(spa_dir))
+        .with_state(state)
+        .layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
