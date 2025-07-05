@@ -1,6 +1,9 @@
-import {Link} from "react-router";
+import {Link, useRouteError} from "react-router";
 
 export default function UserErrorPage() {
+    const error = useRouteError();
+    console.log(error);
+
     return (
         <main className="grow grid place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
             <div className="text-center">

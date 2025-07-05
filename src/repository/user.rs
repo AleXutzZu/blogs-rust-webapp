@@ -1,3 +1,4 @@
+use diesel::ExpressionMethods;
 use crate::error::AppResult;
 use crate::model::user::{UpdateUser, User};
 use deadpool_diesel::postgres::{Manager, Object};
@@ -47,6 +48,7 @@ impl UserRepository {
         conn.interact(move |conn| {
             diesel::update(crate::schema::users::table)
                 .set(&user)
+                .filter(crate::schema::users::username.eq(&user.username))
                 .execute(conn)
         }).await??;
         

@@ -84,7 +84,7 @@ impl UserService {
 
     pub async fn update_user_avatar(&self, username: String, avatar: Vec<u8>) -> AppResult<()> {
         let payload = UpdateUser {
-            username: Some(username),
+            username,
             password: None,
             avatar: Some(avatar),
         };

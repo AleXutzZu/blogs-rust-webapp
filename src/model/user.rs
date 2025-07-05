@@ -30,7 +30,7 @@ pub struct UserDTO {
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[diesel(primary_key(username))]
 pub struct UpdateUser {
-    pub username: Option<String>,
+    pub username: String,
     pub password: Option<String>,
     pub avatar: Option<Vec<u8>>,
 }
