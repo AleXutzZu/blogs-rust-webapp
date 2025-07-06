@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
-use axum::Json;
 use axum::response::{IntoResponse, Response};
+use axum::Json;
 use serde::Serialize;
 
 #[derive(thiserror::Error, Debug)]
@@ -19,8 +19,8 @@ pub enum AppError {
     BcryptError(#[from] bcrypt::BcryptError),
     #[error(transparent)]
     FormError(#[from] axum_extra::extract::multipart::MultipartError),
-    #[error("Username already exists")]
-    SignUpError,
+    #[error("{0}")]
+    SignUpError(String),
     #[error("{0}")]
     DieselError(String),
 }
@@ -28,7 +28,10 @@ pub enum AppError {
 impl From<diesel::result::Error> for AppError {
     fn from(value: diesel::result::Error) -> Self {
         match value {
-            diesel::result::Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, _) => AppError::SignUpError,
+            diesel::result::Error::DatabaseError(
+                diesel::result::DatabaseErrorKind::UniqueViolation,
+                _,
+            ) => AppError::SignUpError("Username already exists".to_string()),
             _ => AppError::DieselError(value.to_string()),
         }
     }
@@ -49,7 +52,7 @@ impl IntoResponse for AppError {
             | AppError::BcryptError(_)
             | AppError::FormError(_)
             | AppError::InternalError(_)
-            | AppError::SignUpError => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
+            | AppError::SignUpError(_) => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
 
             AppError::LoginError => (StatusCode::UNAUTHORIZED, self.to_string()),
 

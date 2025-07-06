@@ -1,10 +1,11 @@
-use diesel::ExpressionMethods;
+use crate::error::AppError::SignUpError;
 use crate::error::AppResult;
 use crate::model::user::{UpdateUser, User};
 use deadpool_diesel::postgres::{Manager, Object};
 use deadpool_diesel::Pool;
-use diesel::QueryDsl;
+use diesel::ExpressionMethods;
 use diesel::OptionalExtension;
+use diesel::QueryDsl;
 use diesel::{RunQueryDsl, SelectableHelper};
 
 pub struct UserRepository {
@@ -15,8 +16,19 @@ impl UserRepository {
     pub fn new(connection_pool: Pool<Manager, Object>) -> Self {
         Self { connection_pool }
     }
-    
+
+    fn is_correct_username(username: &str) -> bool {
+        !username.is_empty()
+            && username
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || c == '_')
+    }
+
     pub async fn create_new_user(&self, user: User) -> AppResult<()> {
+        if !Self::is_correct_username(&user.username) {
+            return Err(SignUpError("Username is invalid".to_string()));
+        }
+
         use crate::schema::users::dsl::*;
         let conn = self.connection_pool.get().await?;
 
@@ -44,14 +56,15 @@ impl UserRepository {
 
     pub async fn update_user(&self, user: UpdateUser) -> AppResult<()> {
         let conn = self.connection_pool.get().await?;
-        
+
         conn.interact(move |conn| {
             diesel::update(crate::schema::users::table)
                 .set(&user)
                 .filter(crate::schema::users::username.eq(&user.username))
                 .execute(conn)
-        }).await??;
-        
+        })
+        .await??;
+
         Ok(())
     }
 }

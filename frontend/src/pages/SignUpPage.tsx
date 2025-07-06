@@ -26,7 +26,7 @@ export default function SignUpPage() {
     const actionData = useActionData() as { error: string } | undefined;
 
     const validationSchema = Yup.object({
-        username: Yup.string().required("Username is required"),
+        username: Yup.string().required("Username is required").matches(/^\w+$/),
         password: Yup.string().required("Password is required"),
     });
 
