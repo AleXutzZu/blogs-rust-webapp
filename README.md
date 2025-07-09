@@ -20,13 +20,12 @@ This is a full-stack blogging platform built using:
 
 ## 🚀 Running locally
 
-There is a `docker-compose.yml` file ready with a PostgresSQL container and the container for the webserver:
-- For the PostgresSQL container, supply the user, password and database name as environment variables.
+There is a `docker-compose.yml` file ready with a PostgreSQL container and the container for the webserver:
+- For the PostgreSQL container, supply the user, password and database name as environment variables.
 - For the webserver container, supply the `DATABASE_URL` environment variable and you are ready to go.
 
 Aditionally, you can use the `Dockerfile` to build just the webserver container and hook it up to whatever Postgres database you have available.
 
-You can also access the hosted version [here](https://rustyposts.onrender.com/).
 
 ## 🤝 Contributing
 
